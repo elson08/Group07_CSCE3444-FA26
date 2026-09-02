@@ -7,8 +7,6 @@
 ### Team Members
 
 * Shovit Gyanwali
-* Kenneth Roland
-* Christian Kalenga
 
 ## Project Idea
 
