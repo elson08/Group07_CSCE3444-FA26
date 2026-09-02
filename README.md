@@ -7,6 +7,7 @@
 ### Team Members
 
 * Shovit Gyanwali
+* Christian Kalenga
 
 ## Project Idea
 
