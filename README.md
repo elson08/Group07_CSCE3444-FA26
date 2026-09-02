@@ -8,6 +8,7 @@
 
 * Shovit Gyanwali
 * Christian Kalenga
+* Kenneth Roland
 
 ## Project Idea
 
