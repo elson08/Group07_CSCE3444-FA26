@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>7Movies Profile</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<!-- Main body of the Profile Page -->
+<body>
+
+    <!-- This is the bar that runs across the top part of the site, houses only the Site Name on this page -->
+    <header class="topbar">
+
+        <!-- Site Name -->
+        <a class="brand" href="index.html">7Movies</a>
+        
+        <!-- A placeholder to take up space at the top, separating the site name from the sign out button -->
+        <h1 class="space-bar"></h1>
+        
+        <!-- Sign Out Button: Currently just moves the user to the Sign In page, can be changed once the account system has been implemented -->
+        <a class="nav-button" href="signin.html">Sign Out</a>
+    </header>
+
+    <!-- Main section where all the account information will be displayed -->
+    <main class="container">
+
+        <!-- Where the user's Username will go, will have to be populated using JavaScript most likely -->
+        <h1 id="profileName">@Placeholder</h1>
+
+        <!-- The area that keeps the 3 lists of Movies, Shows and Subscriptions tied to the User's account -->
+        <div class="lists-grid">
+
+            <!-- List for the Movies -->
+            <section class="list-panel">
+                <h2>Movies</h2>
+
+                <!-- Search Bar to search for any movies to add to the list. Currently does nothing -->
+                <div class="add-to-profile">
+                    <input
+                        type="text"
+                        id="movieSearch"
+                        placeholder="Search for a movie..."
+                    >
+
+                    <!-- Currently does nothing -->
+                    <button>
+                        Add
+                    </button>
+                </div>
+
+                <!-- Populates using JavaScript that will be tied to what movies 
+                    the User already has attached to their account -->
+                <div id="movies" class="scroll-list"></div>
+            </section>
+
+            <!-- List for the Shows -->
+            <section class="list-panel">
+                <h2>Shows</h2>
+
+                <!-- Search Bar to search for any shows to add to the list. Currently does nothing -->
+                <div class="add-to-profile">
+                    <input
+                        type="text"
+                        id="showSearch"
+                        placeholder="Search for a show..."
+                    >
+
+                    <!-- Currently does nothing -->
+                    <button>
+                        Add
+                    </button>
+                </div>
+
+                <!-- Populates using JavaScript that will be tied to what Shows 
+                    the User already has attached to their account -->
+                <div id="shows" class="scroll-list"></div>
+            </section>
+
+            <!-- List for the Subscriptions -->
+            <section class="list-panel">
+                <h2>Subscriptions</h2>
+
+                <!-- Search Bar to search for any subscriptions to add to the list. Currently does nothing -->
+                <div class="add-to-profile">
+                    <input
+                        type="text"
+                        id="subscriptionSearch"
+                        placeholder="Search for a subscription service..."
+                    >
+
+                    <!-- Currently does nothing -->
+                    <button>
+                        Add
+                    </button>
+                </div>
+                
+                <!-- Populates using JavaScript that will be tied to what Subscriptions 
+                    the User already has attached to their account. -->
+                <!-- Currently does nothing -->
+                <div id="subscriptions" class="scroll-list"></div>
+            </section>
+
+        </div>
+
+    </main>
+
+    <!-- The JavaScript that sets up the profile page by looking for the container section -->
+    <script src="proof-of-concept.js"></script>
+</body>
+</html>

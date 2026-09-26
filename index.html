@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>7Movies Home</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<!-- Main body of the home menu-->
+<body>
+
+    <!-- This is the bar that runs across the top part of the site, houses the Site Name, 
+     Selection Dropdowns, the Search Bar, Sign out and Profile buttons on this page -->
+    <header class="topbar">
+        
+        <!-- Site Name -->
+        <a class="brand" href="index.html">7Movies</a>
+
+        <!-- Sectioning out a space for the Search Bar and Selections -->
+        <div class="search-area">
+
+            <!-- Subscription Select Dropdown: We will likely have to use JavaScript to dynamically change 
+                what options are here depending on what servces the user added to their account -->
+            <select class="sub-select" id="subscriptionFilter">
+                <option value="">All Subscriptions</option>
+                <option value="netflix">Netflix</option>
+                <option value="hulu">Hulu</option>
+                <option value="prime video">Prime Video</option>
+                <option value="paramount+">Paramount+</option>
+                <option value="max">Max</option>
+                <option value="peacock">Peacock</option>
+                <option value="disney+">Disney+</option>
+            </select>
+
+            <!-- Genre Select Dropdown, More genres can be easily added:
+                Create a value for the option and give it a name -->
+            <select class="genre-select" id="genreFilter">
+                <option value="">Genre</option>
+                <option value="action">Action</option>
+                <option value="adventure">Adventure</option>
+                <option value="comedy">Comedy</option>
+                <option value="drama">Drama</option>
+                <option value="horror">Horror</option>
+                <option value="sci-fi">Sci-Fi</option>
+                <option value="thriller">Thriller</option>
+            </select>
+
+            <!-- This is the search bar -->
+            <form id="searchForm" class="search">
+                <input
+                    id="searchInput"
+                    type="search"
+                    placeholder="Search movies/shows"
+                    aria-label="Search movies/shows"
+                >
+                <button type="submit" aria-label="Search">⌕</button>
+            </form>
+        </div>
+
+        <!-- Sign Out Button: Currently just moves the user to the Sign In page, can be changed once the account system has been implemented -->
+        <a class="nav-button" href="signin.html">Sign Out</a>
+        
+        <!-- Profile Button: Hopefully we could eventually add a profile picture system and replace the "P" with the user's PFP -->
+        <a class="avatar" href="profile.html" aria-label="Your profile">P</a>
+    </header>
+
+    <!-- Main section of the page where the movie reccomendations are kept -->
+    <main class="container">
+        
+        <!-- Section for the Top 3 Movies/Shows recommended -->
+        <section>
+            <!-- The header for the top 3 -->
+            <div class="section-heading">
+                <h1>Top 3</h1>
+            </div>
+            <!-- The place where the top 3 movies/shows will be populated thorugh js code -->
+            <div id="topMovies" class="movie-grid featured"></div>
+        </section>
+
+        <!-- Another section for the other recommendations -->
+        <section>
+            <!-- The header for the other movies/shows -->
+            <div class="section-heading">
+                <h2>Other Recommendations</h2>
+            </div>
+            <!-- The place where the other movies/shows will be populated thorugh js code -->
+            <div id="otherMovies" class="movie-grid compact"></div>
+        </section>
+
+        <!-- This will only be shown if something goes wrong and no shows were able to populate -->
+        <p id="emptyState" class="empty hidden">No movies error</p>
+
+    </main>
+
+    <!-- The js script that will look for the topMovies section and populate the movie/show sections and deal with searching -->
+    <script src="proof-of-concept.js"></script>
+</body>
+</html>

@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>7Movies Movie/Show</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<!-- Main body of the Movie/Show page, called movie for simplicity -->
+<body>
+
+    <!-- This is the bar that runs across the top part of the site, houses the Site Name, 
+        the Search Bar, Sign out and Profile Buttons on this page -->
+    <header class="topbar">
+        <a class="brand" href="index.html">7Movies</a>
+        <h1 class="space-bar"></h1>
+        
+            <!-- This is the search bar -->
+            <form id="searchForm" class="search">
+                <input
+                    id="searchInput"
+                    type="search"
+                    placeholder="Search movies/shows"
+                    aria-label="Search movies/shows"
+                >
+                <button type="submit" aria-label="Search">⌕</button>
+            </form>
+
+            <!-- Sign Out Button: Currently just moves the user to the Sign In page, can be changed once the account system has been implemented -->
+            <a class="nav-button" href="signin.html">Sign Out</a>
+            
+            <!-- Profile Button: Hopefully we could eventually add a profile picture system and replace the "P" with the user's PFP -->
+            <a class="avatar" href="profile.html" aria-label="Your profile">P</a>
+       
+    </header>
+
+    <!-- Main section where all the movie information will be kept -->
+    <main class="container">
+        
+        <!-- This is the area where the Movie/Show's Poster, Name, Release Year, Genres and Synopsis will be populated by our JavaScript -->
+        <!-- See SetUpMoviePage in proof-of-concept.js for how it works -->
+        <section id="movieHero" class="movie-hero"></section>
+
+        <!-- The lower section where the Subscriptions and the trailer are held -->
+        <div class="movie-content">
+            
+            <!-- Where the JavaScript sends the list of subscriptions the movie has -->
+            <section class="list-panel subscriptions">
+                <h2>Subscriptions</h2>
+                <ul id="subscriptionList" class="subscription-list"></ul>
+            </section>
+
+            <!-- Where the JavaScript sends the trailer's embed url to -->
+            <section class="trailer-panel">
+                <h2>Trailer</h2>
+                <div class="video-wrap">
+                    <iframe
+                        id="trailer"
+                        title="Movie trailer"
+                        src=""
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                        referrerpolicy="strict-origin-when-cross-origin"
+                        allowfullscreen
+                    ></iframe>
+                </div>
+            </section>
+
+        </div>
+
+    </main>
+
+    <!-- The js script that will look for the movieHero section and populate information -->
+    <script src="proof-of-concept.js"></script>
+</body>
+</html>

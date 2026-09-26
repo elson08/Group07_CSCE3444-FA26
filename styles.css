@@ -1,0 +1,473 @@
+:root {
+    color-scheme: dark;
+    --bgColor: #121114;
+    --dividerColor: #15102b;
+    --textColor: #f3f5fa;
+    --extraTextColor: #a9b3c5;
+    --highlightColor: #28a4d4;
+    --border: #303b4e;
+    --mainColor: #111722;
+}
+
+/* Global styles that will be used throughout 7Movies pages*/
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    background: var(--bgColor);
+    color: var(--textColor);
+    font: 16px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+a {
+    color: inherit;
+}
+
+section {
+    margin-bottom: 38px;
+}
+
+.hidden {
+    display: none !important;
+}
+
+.extraText {
+    color: var(--extraTextColor);
+}
+
+.container {
+    max-width: 1180px;
+    margin: 36px auto;
+    padding: 0 22px;
+}
+
+/* Shared header and navigation */
+.topbar {
+    display: flex;
+    align-items: center;
+    gap: 22px;
+    min-height: 76px;
+    padding: 15px max(22px, calc((100% - 1180px) / 2));
+    background: var(--mainColor);
+    border-bottom: 1px solid var(--border);
+}
+
+.brand {
+    color: #ffffff;
+    font-size: 2rem;
+    font-weight: 850;
+    letter-spacing: -0.04em;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.space-bar {
+    margin: 0 auto;
+    font-size: 1rem;
+}
+
+.avatar {
+    display: grid;
+    place-items: center;
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: var(--dividerColor);
+    border: 1px solid var(--border);
+    font-size: 1.2rem;
+    text-decoration: none;
+}
+
+.nav-button,
+.secondary-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 14px;
+    background: var(--dividerColor);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--text);
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.nav-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+/*  Home page: search bar  */
+
+.search-area {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+    max-width: 650px;
+    margin-left: auto;
+}
+
+.search-area .search {
+    flex: 1;
+    margin-left: 0;
+}
+
+.search {
+    display: flex;
+    flex: 1;
+    max-width: 540px;
+    margin-left: auto;
+    overflow: hidden;
+    background: var(--dividerColor);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+}
+
+.search input {
+    width: 100%;
+    padding: 12px 14px;
+    background: transparent;
+    border: 0;
+    color: var(--text);
+    outline: none;
+}
+
+.search button {
+    padding: 0 14px;
+    background: transparent;
+    border: 0;
+    color: var(--text);
+    font-size: 1.6rem;
+    cursor: pointer;
+}
+
+
+/* Genre and subscription dropdown */
+
+.genre-select, .sub-select {
+    padding: 10px 14px;
+    background: var(--dividerColor);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--textColor);
+    font: inherit;
+    cursor: pointer;
+}
+
+/* Home page: movie cards */
+.section-heading {
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    margin-bottom: 18px;
+}
+
+.section-heading h1,
+.section-heading h2 {
+    margin: 0;
+    font-size: 1.65rem;
+}
+
+.section-heading span {
+    color: var(--extraTextColor);
+}
+
+.movie-grid {
+    display: grid;
+    gap: 18px;
+}
+
+.featured {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.compact {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 14px;
+}
+
+.movie-card {
+    min-width: 0;
+    overflow: hidden;
+    background: var(--mainColor);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    transition: transform 0.15s, border-color 0.15s;
+}
+
+.movie-card:hover {
+    transform: translateY(-3px);
+    border-color: var(--highlightBorder);
+}
+
+.movie-card a {
+    display: block;
+    height: 100%;
+    color: inherit;
+    text-decoration: none;
+}
+
+.poster {
+    display: block;
+    width: 100%;
+    aspect-ratio: 2 / 3;
+    object-fit: cover;
+    background: var(--mainColor);
+}
+
+.movie-card h3 {
+    margin: 12px 13px 14px;
+    font-size: 1rem;
+}
+
+.compact .movie-card h3 {
+    margin: 9px;
+    font-size: 0.88rem;
+}
+
+.empty {
+    padding: 24px;
+    background: var(--mainColor);
+    border-radius: 12px;
+}
+
+/* Profile page */
+.lists-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 18px;
+}
+
+.list-panel,
+.trailer-panel {
+    min-width: 0;
+    padding: 18px;
+    background: var(--mainColor);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+}
+
+.list-panel h2,
+.trailer-panel h2 {
+    margin: 0 0 14px;
+}
+
+.scroll-list {
+    display: grid;
+    align-content: start;
+    gap: 10px;
+    height: 330px;
+    overflow-y: auto;
+    padding-right: 4px;
+}
+
+.list-entry {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    padding: 9px;
+    
+    border-radius: 10px;
+}
+
+.list-entry img {
+    width: 48px;
+    height: 68px;
+    border-radius: 6px;
+    object-fit: cover;
+}
+
+.list-entry a {
+    color: var(--text);
+    font-weight: 600;
+    text-decoration: none;
+}
+
+/* Sign-in / create-account pages */
+.auth-page {
+    min-height: 100vh;
+}
+
+.auth-card {
+    width: min(440px, calc(100% - 32px));
+    margin: 55px auto;
+    padding: 32px;
+    background: var(--mainColor);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    text-align: center;
+}
+
+.logo-mark {
+    font-size: 2.3rem;
+}
+
+.auth-card h1 {
+    margin: 8px 0;
+}
+
+.auth-form {
+    display: grid;
+    gap: 16px;
+    margin: 26px 0 20px;
+    text-align: left;
+}
+
+.auth-form label {
+    display: grid;
+    gap: 7px;
+    font-weight: 600;
+}
+
+.auth-form input {
+    width: 100%;
+    padding: 13px;
+    background: var(--dividerColor);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--text);
+    font: inherit;
+}
+
+.primary {
+    padding: 13px;
+    background: var(--dividerColor);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--text);
+    font: inherit;
+    font-weight: 750;
+    cursor: pointer;
+}
+
+.primary:hover {
+    background: var(--highlightColor);
+    color: black;
+}
+
+.secondary-button {
+    width: 100%;
+    margin-top: 4px;
+}
+
+.form-message {
+    min-height: 1.4em;
+    margin: 0;
+    color: #c7d2fe;
+    text-align: center;
+}
+
+.auth-card a:not(.secondary-button) {
+    color: var(--highlightColor);
+}
+
+/* Movie details page  */
+.movie-hero {
+    display: flex;
+    align-items: center;
+    gap: 26px;
+    margin-bottom: 24px;
+    padding: 24px;
+    background: var(--mainColor);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+}
+
+.movie-hero .poster {
+    flex-shrink: 0;
+    width: 170px;
+    border-radius: 12px;
+}
+
+.movie-hero h1 {
+    margin: 0 0 8px;
+    font-size: clamp(1.8rem, 4vw, 3rem);
+}
+
+.movie-hero p {
+    max-width: 680px;
+    color: var(--extraTextColor);
+}
+
+.movie-content {
+    display: grid;
+    grid-template-columns: minmax(240px, 0.8fr) minmax(0, 1.6fr);
+    gap: 20px;
+}
+
+.subscription-list {
+    padding-left: 20px;
+    line-height: 2;
+}
+
+.add-to-profile {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 14px;
+}
+
+.add-to-profile input {
+    min-width: 0;
+    flex: 1;
+    padding: 9px;
+    background: var(--bgColor);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--textColor);
+    font: inherit;
+}
+
+.add-to-profile button {
+    padding: 9px 12px;
+    background: var(--dividerColor);
+    border: 0;
+    border-radius: 8px;
+    color: var(--textColor);
+    font: inherit;
+    cursor: pointer;
+}
+
+.add-to-profile button:hover {
+    background: var(--highlightColor);
+    color: black;
+}
+
+.delete-movie {
+    margin-left: auto;
+    padding: 6px 9px;
+    background: #3a1820;
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    color: var(--textColor);
+    cursor: pointer;
+}
+
+.delete-movie:hover {
+    background: #5a202c;
+}
+
+.fine-print {
+    color: var(--extraTextColor);
+    font-size: 0.8rem;
+}
+
+.video-wrap {
+    position: relative;
+    overflow: hidden;
+    aspect-ratio: 16 / 9;
+    background: #05070b;
+    border-radius: 10px;
+}
+
+.video-wrap iframe {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+}
+

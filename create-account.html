@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>7Movies Create Account</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<!-- Main body of the Create Account Page -->
+<body class="auth-page">
+    
+    <!-- This is the bar that runs across the top part of the site, houses only the Site Name on this page -->
+    <header class="topbar">
+
+        <!-- Site Name -->
+        <a class="brand" href="index.html">7Movies</a>
+    </header>
+
+    <!-- Main section where the information to create an account sits -->
+    <main class="auth-card">
+        <h1>Create your account</h1>
+
+        <!-- Section within where the information goes -->
+        <form id="createForm" class="auth-form">
+            
+            <!-- Label to input the wanted Username, will have to add checks 
+                for the username being already taken or not -->
+            <label>
+                Username
+                <input
+                    name="tex"
+                    type="text"
+                    autocomplete="username"
+                    required
+                    minlength="3"
+                    placeholder="Choose a username"
+                >
+            </label>
+
+            <!-- Label to input the user's email, will have to add checks 
+                for the email being already taken or not -->
+            <label>
+                Email
+                <input
+                    name="text"
+                    type="email"
+                    required
+                    placeholder="you@example.com"
+                >
+            </label>
+
+            <!-- Label to input the password, automatically checks for password 
+                contains at least 1 capital letter and 1 symbol -->
+            <label>
+                Password
+                <input
+                    name="text"
+                    type="password"
+                    autocomplete="new-password"
+                    pattern="(?=.*[A-Z])(?=.*[^A-Za-z0-9]).+" 
+                    title="Must contain at least one captial letter and one symbol (#, $, etc.)"
+                    required
+                    minlength="8"
+                    placeholder="Choose a password."
+                >
+            </label>
+
+            <!-- Submition button that will create the account -->
+            <button class="primary" type="submit">Create Account</button>
+
+            <!-- waits for the user to press the submit button before telling them what they are missing -->
+            <p id="authMessage" class="form-message" aria-live="polite"></p>
+        </form>
+
+        <!-- Link to the sign-in page incase the user already has an account -->
+        <p class="extraText">Already have an account? <a href="signin.html">Sign in</a></p>
+    </main>
+
+    <!-- The js script that will likely be used to connect the website to the database and add the account -->
+    <script src="proof-of-concept.js"></script>
+</body>
+</html>
