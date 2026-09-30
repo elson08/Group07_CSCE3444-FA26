@@ -29,11 +29,14 @@
             <label>
                 Username
                 <input
-                    name="tex"
+                    name="username"
                     type="text"
                     autocomplete="username"
                     required
                     minlength="3"
+                    maxlength="32"
+                    pattern="[A-Za-z0-9_\-]{3,32}"
+                    title="Use 3-32 letters, digits, hyphens, or underscores"
                     placeholder="Choose a username"
                 >
             </label>
@@ -43,23 +46,22 @@
             <label>
                 Email
                 <input
-                    name="text"
+                    name="email"
                     type="email"
+                    autocomplete="email"
+                    maxlength="254"
                     required
                     placeholder="you@example.com"
                 >
             </label>
 
-            <!-- Label to input the password, automatically checks for password 
-                contains at least 1 capital letter and 1 symbol -->
+            <!-- Password length is checked again by the backend. -->
             <label>
                 Password
                 <input
-                    name="text"
+                    name="password"
                     type="password"
                     autocomplete="new-password"
-                    pattern="(?=.*[A-Z])(?=.*[^A-Za-z0-9]).+" 
-                    title="Must contain at least one captial letter and one symbol (#, $, etc.)"
                     required
                     minlength="8"
                     placeholder="Choose a password."
@@ -77,7 +79,7 @@
         <p class="extraText">Already have an account? <a href="signin.html">Sign in</a></p>
     </main>
 
-    <!-- The js script that will likely be used to connect the website to the database and add the account -->
-    <script src="proof-of-concept.js"></script>
+    <!-- Submit account details to the backend. -->
+    <script type="module" src="auth.js"></script>
 </body>
 </html>

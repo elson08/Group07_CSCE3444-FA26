@@ -58,8 +58,8 @@
             </form>
         </div>
 
-        <!-- Sign Out Button: Currently just moves the user to the Sign In page, can be changed once the account system has been implemented -->
-        <a class="nav-button" href="signin.html">Sign Out</a>
+        <!-- The session script changes this to Sign Out after login. -->
+        <a class="nav-button" href="signin.html" data-session-link>Sign In</a>
         
         <!-- Profile Button: Hopefully we could eventually add a profile picture system and replace the "P" with the user's PFP -->
         <a class="avatar" href="profile.html" aria-label="Your profile">P</a>
@@ -67,6 +67,7 @@
 
     <!-- Main section of the page where the movie reccomendations are kept -->
     <main class="container">
+        <p id="sessionMessage" class="form-message" aria-live="polite"></p>
         
         <!-- Section for the Top 3 Movies/Shows recommended -->
         <section>
@@ -95,5 +96,6 @@
 
     <!-- The js script that will look for the topMovies section and populate the movie/show sections and deal with searching -->
     <script src="proof-of-concept.js"></script>
+    <script type="module" src="auth.js"></script>
 </body>
 </html>
