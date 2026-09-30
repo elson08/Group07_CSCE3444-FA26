@@ -27,8 +27,8 @@
                 <button type="submit" aria-label="Search">⌕</button>
             </form>
 
-            <!-- Sign Out Button: Currently just moves the user to the Sign In page, can be changed once the account system has been implemented -->
-            <a class="nav-button" href="signin.html">Sign Out</a>
+            <!-- The session script changes this to Sign Out after login. -->
+            <a class="nav-button" href="signin.html" data-session-link>Sign In</a>
             
             <!-- Profile Button: Hopefully we could eventually add a profile picture system and replace the "P" with the user's PFP -->
             <a class="avatar" href="profile.html" aria-label="Your profile">P</a>
@@ -37,6 +37,7 @@
 
     <!-- Main section where all the movie information will be kept -->
     <main class="container">
+        <p id="sessionMessage" class="form-message" aria-live="polite"></p>
         
         <!-- This is the area where the Movie/Show's Poster, Name, Release Year, Genres and Synopsis will be populated by our JavaScript -->
         <!-- See SetUpMoviePage in proof-of-concept.js for how it works -->
@@ -72,5 +73,6 @@
 
     <!-- The js script that will look for the movieHero section and populate information -->
     <script src="proof-of-concept.js"></script>
+    <script type="module" src="auth.js"></script>
 </body>
 </html>

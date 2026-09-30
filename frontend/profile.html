@@ -19,15 +19,18 @@
         <!-- A placeholder to take up space at the top, separating the site name from the sign out button -->
         <h1 class="space-bar"></h1>
         
-        <!-- Sign Out Button: Currently just moves the user to the Sign In page, can be changed once the account system has been implemented -->
-        <a class="nav-button" href="signin.html">Sign Out</a>
+        <!-- The session script connects this to backend logout. -->
+        <a class="nav-button" href="signin.html" data-session-link>Sign In</a>
     </header>
 
     <!-- Main section where all the account information will be displayed -->
     <main class="container">
 
-        <!-- Where the user's Username will go, will have to be populated using JavaScript most likely -->
-        <h1 id="profileName">@Placeholder</h1>
+        <!-- Account details come from GET /api/me. -->
+        <h1 id="profileName">Loading account...</h1>
+        <p id="profileEmail" class="extraText"></p>
+        <p id="sessionMessage" class="form-message" aria-live="polite"></p>
+        <p class="extraText">The lists below show sample data and are not connected to your account yet.</p>
 
         <!-- The area that keeps the 3 lists of Movies, Shows and Subscriptions tied to the User's account -->
         <div class="lists-grid">
@@ -108,5 +111,6 @@
 
     <!-- The JavaScript that sets up the profile page by looking for the container section -->
     <script src="proof-of-concept.js"></script>
+    <script type="module" src="auth.js"></script>
 </body>
 </html>
