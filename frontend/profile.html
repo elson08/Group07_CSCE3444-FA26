@@ -30,81 +30,52 @@
         <h1 id="profileName">Loading account...</h1>
         <p id="profileEmail" class="extraText"></p>
         <p id="sessionMessage" class="form-message" aria-live="polite"></p>
-        <p class="extraText">The lists below show sample data and are not connected to your account yet.</p>
+        <p class="extraText">Manage your watchlist and viewing history. These lists are saved in this browser.</p>
 
-        <!-- The area that keeps the 3 lists of Movies, Shows and Subscriptions tied to the User's account -->
+        <!-- Personal collections: movies, shows, and subscriptions are saved in this browser. -->
+        <h2>My Collections</h2>
+        <p class="extraText">Add or remove titles and streaming services. Start typing to see suggestions.</p>
         <div class="lists-grid">
-
-            <!-- List for the Movies -->
             <section class="list-panel">
                 <h2>Movies</h2>
-
-                <!-- Search Bar to search for any movies to add to the list. Currently does nothing -->
                 <div class="add-to-profile">
-                    <input
-                        type="text"
-                        id="movieSearch"
-                        placeholder="Search for a movie..."
-                    >
-
-                    <!-- Currently does nothing -->
-                    <button>
-                        Add
-                    </button>
+                    <input type="text" id="movieSearch" placeholder="Search for a movie..." aria-label="Search for a movie" autocomplete="off">
+                    <button type="button">Add</button>
                 </div>
-
-                <!-- Populates using JavaScript that will be tied to what movies 
-                    the User already has attached to their account -->
-                <div id="movies" class="scroll-list"></div>
+                <div id="movies" class="scroll-list" aria-live="polite"></div>
             </section>
-
-            <!-- List for the Shows -->
             <section class="list-panel">
                 <h2>Shows</h2>
-
-                <!-- Search Bar to search for any shows to add to the list. Currently does nothing -->
                 <div class="add-to-profile">
-                    <input
-                        type="text"
-                        id="showSearch"
-                        placeholder="Search for a show..."
-                    >
-
-                    <!-- Currently does nothing -->
-                    <button>
-                        Add
-                    </button>
+                    <input type="text" id="showSearch" placeholder="Search for a show..." aria-label="Search for a show" autocomplete="off">
+                    <button type="button">Add</button>
                 </div>
-
-                <!-- Populates using JavaScript that will be tied to what Shows 
-                    the User already has attached to their account -->
-                <div id="shows" class="scroll-list"></div>
+                <div id="shows" class="scroll-list" aria-live="polite"></div>
             </section>
-
-            <!-- List for the Subscriptions -->
             <section class="list-panel">
                 <h2>Subscriptions</h2>
-
-                <!-- Search Bar to search for any subscriptions to add to the list. Currently does nothing -->
                 <div class="add-to-profile">
-                    <input
-                        type="text"
-                        id="subscriptionSearch"
-                        placeholder="Search for a subscription service..."
-                    >
-
-                    <!-- Currently does nothing -->
-                    <button>
-                        Add
-                    </button>
+                    <input type="text" id="subscriptionSearch" placeholder="Search streaming services..." aria-label="Search streaming services" autocomplete="off">
+                    <button type="button">Add</button>
                 </div>
-                
-                <!-- Populates using JavaScript that will be tied to what Subscriptions 
-                    the User already has attached to their account. -->
-                <!-- Currently does nothing -->
-                <div id="subscriptions" class="scroll-list"></div>
+                <div id="subscriptions" class="scroll-list" aria-live="polite"></div>
+            </section>
+        </div>
+
+        <!-- Watchlist and viewing history feature: these sections are populated by proof-of-concept.js. -->
+        <h2>Watchlist and Viewing History</h2>
+        <div class="watch-history-grid">
+            <section class="list-panel">
+                <h2>My Watchlist</h2>
+                <p class="extraText">Titles you want to watch later.</p>
+                <div id="watchlist" class="scroll-list" aria-live="polite"></div>
             </section>
 
+            <section class="list-panel">
+                <h2>Viewing History</h2>
+                <p class="extraText">Titles you have opened and marked as watched.</p>
+                <div id="viewingHistory" class="scroll-list" aria-live="polite"></div>
+            </section>
         </div>
 
     </main>
