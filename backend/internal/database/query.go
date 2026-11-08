@@ -70,6 +70,21 @@ const (
 		WHERE user_id = ? AND title_id = ?`
 )
 
+const (
+	hasTitlesQuery = `SELECT EXISTS(SELECT 1 FROM titles)`
+
+	insertTitleQuery = `INSERT INTO titles (provider_id, kind, name, release_year)
+		VALUES (?, ?, ?, ?)`
+
+	upsertGenreQuery = `INSERT INTO genres (name)
+		VALUES (?)
+		ON CONFLICT(name) DO UPDATE SET name = excluded.name
+		RETURNING id`
+
+	linkTitleGenreQuery = `INSERT INTO title_genres (title_id, genre_id)
+		VALUES (?, ?)`
+)
+
 // Streaming service and saved-service queries.
 const (
 	listServicesQuery = `SELECT id, name FROM services ORDER BY name`
