@@ -40,6 +40,10 @@ func (s *Server) listTitles(w http.ResponseWriter, r *http.Request) {
 	}
 
 	titles, err := s.database.ListTitles(r.Context(), query, kind, limit, offset)
+	if err == nil && s.fillDetails(r.Context(), titles) {
+		titles, err = s.database.ListTitles(r.Context(), query, kind, limit, offset)
+	}
+
 	if err != nil {
 		writeError(w, http.StatusInternalServerError, "could not list titles")
 		return
@@ -56,6 +60,9 @@ func (s *Server) getTitle(w http.ResponseWriter, r *http.Request) {
 	}
 
 	title, err := s.database.TitleByID(r.Context(), id)
+	if err == nil && s.fillDetails(r.Context(), []model.Title{title}) {
+		title, err = s.database.TitleByID(r.Context(), id)
+	}
 
 	if errors.Is(err, sql.ErrNoRows) {
 		writeError(w, http.StatusNotFound, "title not found")

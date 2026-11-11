@@ -99,6 +99,33 @@ function getMovieById(id) {
     return movies.find((movie) => movie.id === id);
 }
 
+function escapeHTML(value) {
+    const element = document.createElement("div");
+    element.textContent = value;
+    return element.innerHTML.replaceAll('"', "&quot;");
+}
+
+async function fetchAPI(path) {
+    const response = await fetch(`/api${path}`);
+    if (!response.ok) {
+        throw new Error(`Request failed: ${response.status}`);
+    }
+    return response.json();
+}
+
+function titleToMovie(title) {
+    return {
+        id: title.id,
+        title: title.name,
+        year: title.release_year ?? "",
+        genre: (title.genres ?? []).map((genre) => genre.name).join(" / "),
+        description: title.synopsis || "No description available.",
+        poster: title.poster_url ?? "",
+        trailerUrl: title.trailer_url,
+        subscriptions: (title.services ?? []).map((service) => service.name)
+    };
+}
+
 /**
  * Create the HTML for a clickable movie card.
  */
@@ -108,12 +135,12 @@ function createMovieCard(movie) {
             <a href="movie.html?id=${encodeURIComponent(movie.id)}">
                 <img
                     class="poster"
-                    src="${movie.poster}"
-                    alt="${movie.title} poster"
+                    src="${escapeHTML(movie.poster)}"
+                    alt="${escapeHTML(movie.title)} poster"
                     loading="lazy"
                     onerror="this.src='https://placehold.co/500x750/222c3d/ffffff?text=Movie+Poster'"
                 >
-                <h3>${movie.title}</h3>
+                <h3>${escapeHTML(movie.title)}</h3>
             </a>
         </article>
     `;
@@ -123,76 +150,62 @@ function createMovieCard(movie) {
  * Render the Top 3 and Other Recommendations sections.
  * The search field filters both sections by movie title.
  */
-function setupHomePage() {
+async function setupHomePage() {
 
     // DOM accessors so the javascript can edit and access the html
     const topMoviesContainer = document.querySelector("#topMovies");
     const otherMoviesContainer = document.querySelector("#otherMovies");
     const emptyState = document.querySelector("#emptyState");
     const searchInput = document.querySelector("#searchInput");
-    const searchForm = document.querySelector("#searchForm");
-    
+
     // If either of elements aren't on the current page, we're not on the home page or something went wrong so we stop here.
     if (!topMoviesContainer || !otherMoviesContainer) {
         return;
     }
 
-    // helper function to create the movie cards based on if they are in the "top 3" or "other" section
-    function renderMovies(searchText = "") {
-        const normalizedSearch = searchText.trim().toLowerCase();
+    const searchText = new URLSearchParams(window.location.search).get("q") ?? "";
+    searchInput.value = searchText;
 
-
-        const matchingMovies = movies.filter((movie) =>
-            movie.title.toLowerCase().includes(normalizedSearch)
-        );
-
-        // Splits the topMovies section into the first 3 movies from the movies container and joins them together
-        topMoviesContainer.innerHTML = matchingMovies
-            .slice(0, 3)
-            .map(createMovieCard)
-            .join("");
-
-        // Splits the otherMovies section into the rest of the movies from the movies container and joins them together
-        otherMoviesContainer.innerHTML = matchingMovies
-            .slice(3, 8)
-            .map(createMovieCard)
-            .join("");
-
-        emptyState.classList.toggle("hidden", matchingMovies.length > 0);
+    let matchingMovies = [];
+    try {
+        const query = new URLSearchParams({ q: searchText, limit: searchText ? 50 : 8 });
+        const titles = await fetchAPI(`/titles?${query}`);
+        matchingMovies = titles.map(titleToMovie);
+        emptyState.textContent = "No movies found. Try another title.";
+    } catch {
+        emptyState.textContent = "Could not load movies. Please try again later.";
     }
 
-    renderMovies();
+    // Splits the topMovies section into the first 3 movies from the movies container and joins them together
+    topMoviesContainer.innerHTML = matchingMovies
+        .slice(0, 3)
+        .map(createMovieCard)
+        .join("");
 
-    // the basic search bar logic, this needs to be changed to have a dynamic list of possible movie choices for the user
+    // Splits the otherMovies section into the rest of the movies from the movies container and joins them together
+    otherMoviesContainer.innerHTML = matchingMovies
+        .slice(3)
+        .map(createMovieCard)
+        .join("");
+
+    emptyState.classList.toggle("hidden", matchingMovies.length > 0);
+}
+
+function setupSearch() {
+    const searchForm = document.querySelector("#searchForm");
+
+    if (!searchForm) {
+        return;
+    }
+
     searchForm.addEventListener("submit", (event) => {
         event.preventDefault();
 
-        const search = searchInput.value.trim().toLowerCase();
+        const search = document.querySelector("#searchInput").value.trim();
 
         // Won't search if the input is empty.
-        if (search === "") {
-            return;
-        }
-
-        // We first look for an exact match
-        let movie = movies.find(
-            (movie) => movie.title.toLowerCase() === search
-        );
-
-        // If there is no exact match, then we look for a partial match that includes what we typed
-        if (!movie) {
-            movie = movies.find(
-                (movie) => movie.title.toLowerCase().includes(search)
-            );
-        }
-
-        // If a movie is found, go to its movie page
-        if (movie) {
-            window.location.href = `movie.html?id=${movie.id}`;
-        } else {
-            // Show a message if no movie matches.
-            emptyState.textContent = "No movies found. Try another title.";
-            emptyState.classList.remove("hidden");
+        if (search !== "") {
+            window.location.href = `index.html?q=${encodeURIComponent(search)}`;
         }
     });
 }
@@ -246,7 +259,7 @@ function setupProfilePage() {
 /**
  * Fill the movie detail page using the movie ID in the URL.
  */
-function setupMoviePage() {
+async function setupMoviePage() {
     const movieHero = document.querySelector("#movieHero");
 
     // The movie detail elements only exist on movie.html.
@@ -254,71 +267,49 @@ function setupMoviePage() {
         return;
     }
 
-    const urlParameters = new URLSearchParams(window.location.search);
-    const movie = getMovieById(urlParameters.get("id"));
+    const id = new URLSearchParams(window.location.search).get("id");
+
+    let movie = getMovieById(id);
+    if (!movie) {
+        try {
+            movie = titleToMovie(await fetchAPI(`/titles/${encodeURIComponent(id)}`));
+        } catch {
+            movieHero.innerHTML = "<h1>Movie not found.</h1>";
+            return;
+        }
+    }
 
     document.title = `7Movies | ${movie.title}`;
 
     movieHero.innerHTML = `
         <img
             class="poster"
-            src="${movie.poster}"
-            alt="${movie.title} poster"
+            src="${escapeHTML(movie.poster)}"
+            alt="${escapeHTML(movie.title)} poster"
             onerror="this.src='https://placehold.co/500x750/222c3d/ffffff?text=Movie+Poster'"
         >
 
         <div>
-            <h1>${movie.title}</h1>
-            <strong>${movie.year} · ${movie.genre}</strong>
-            <p>${movie.description}</p>
+            <h1>${escapeHTML(movie.title)}</h1>
+            <strong>${escapeHTML(movie.year)} · ${escapeHTML(movie.genre)}</strong>
+            <p>${escapeHTML(movie.description)}</p>
         </div>
     `;
 
     const subscriptionList = document.querySelector("#subscriptionList");
     subscriptionList.innerHTML = movie.subscriptions
-        .map((service) => `<li>${service}</li>`)
+        .map((service) => `<li>${escapeHTML(service)}</li>`)
         .join("");
 
-    const trailerFrame = document.querySelector("#trailer");
-    trailerFrame.src = `https://www.youtube.com/embed/${movie.trailer}`;
-
-    // Basic search bar logic, copied from the setUpMoviePage function
-    searchForm.addEventListener("submit", (event) => {
-        event.preventDefault();
-
-        const search = searchInput.value.trim().toLowerCase();
-
-        // Won't search if the input is empty.
-        if (search === "") {
-            return;
-        }
-
-        // We first look for an exact match
-        let movie = movies.find(
-            (movie) => movie.title.toLowerCase() === search
-        );
-
-        // If there is no exact match, then we look for a partial match that includes what we typed
-        if (!movie) {
-            movie = movies.find(
-                (movie) => movie.title.toLowerCase().includes(search)
-            );
-        }
-
-        // If a movie is found, go to its movie page
-        if (movie) {
-            window.location.href = `movie.html?id=${movie.id}`;
-        } else {
-            // Show a message if no movie matches.
-            emptyState.textContent = "No movies found. Try another title.";
-            emptyState.classList.remove("hidden");
-        }
-    });
-
+    const trailerSrc = movie.trailerUrl ?? (movie.trailer && `https://www.youtube.com/embed/${movie.trailer}`);
+    if (trailerSrc) {
+        document.querySelector("#trailer").src = trailerSrc;
+    }
 }
 
 
 // Initialize only the functionality relevant to the page being viewed.
+setupSearch();
 setupHomePage();
 setupProfilePage();
 setupMoviePage();

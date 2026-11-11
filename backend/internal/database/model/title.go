@@ -19,6 +19,13 @@ type Title struct {
 	Services    []Service `json:"services,omitempty"`
 }
 
+type TitleDetails struct {
+	Synopsis   string
+	PosterURL  string
+	TrailerURL string
+	Services   []string
+}
+
 // Genre categorizes titles.
 type Genre struct {
 	ID   int64  `json:"id"`

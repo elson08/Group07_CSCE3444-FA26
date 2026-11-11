@@ -132,6 +132,31 @@ func (d *Database) TitleByID(ctx context.Context, id int64) (model.Title, error)
 	return title, err
 }
 
+func (d *Database) SaveTitleDetails(ctx context.Context, titleID int64, details model.TitleDetails) error {
+	tx, err := d.conn.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+
+	if _, err := tx.ExecContext(ctx, saveTitleDetailsQuery, details.Synopsis, details.PosterURL, details.TrailerURL, titleID); err != nil {
+		return err
+	}
+
+	for _, name := range details.Services {
+		var serviceID int64
+		if err := tx.QueryRowContext(ctx, upsertServiceQuery, name).Scan(&serviceID); err != nil {
+			return err
+		}
+
+		if _, err := tx.ExecContext(ctx, linkTitleServiceQuery, titleID, serviceID); err != nil {
+			return err
+		}
+	}
+
+	return tx.Commit()
+}
+
 // TitleExists reports whether a title ID exists.
 func (d *Database) TitleExists(ctx context.Context, id int64) (bool, error) {
 	var exists bool
