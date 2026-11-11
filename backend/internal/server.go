@@ -121,6 +121,7 @@ func (s *Server) registerRoutes() {
 	s.handle("GET /api/services", s.listServices)
 
 	s.handle("GET /api/me/titles", s.listSavedTitles)
+	s.handle("GET /api/me/recommendations", s.listRecommendations)
 	s.handle("PUT /api/me/titles/{id}", s.saveTitle)
 	s.handle("DELETE /api/me/titles/{id}", s.removeTitle)
 

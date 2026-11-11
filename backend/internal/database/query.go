@@ -68,6 +68,31 @@ const (
 
 	removeTitleQuery = `DELETE FROM user_titles
 		WHERE user_id = ? AND title_id = ?`
+
+	recommendedTitlesQuery = `WITH liked AS (
+			SELECT tg.genre_id, COUNT(*) AS weight
+			FROM user_titles ut
+			JOIN title_genres tg ON tg.title_id = ut.title_id
+			WHERE ut.user_id = ?
+			GROUP BY tg.genre_id
+		), scored AS (
+			SELECT tg.title_id, SUM(l.weight) AS score
+			FROM title_genres tg
+			JOIN liked l ON l.genre_id = tg.genre_id
+			GROUP BY tg.title_id
+		)
+		SELECT ` + titleColumns + `
+		FROM scored s
+		JOIN titles t ON t.id = s.title_id
+		WHERE t.id NOT IN (SELECT title_id FROM user_titles WHERE user_id = ?)
+		ORDER BY EXISTS(
+				SELECT 1
+				FROM title_services ts
+				JOIN user_services us ON us.service_id = ts.service_id
+				WHERE ts.title_id = t.id AND us.user_id = ?
+			) DESC,
+			s.score DESC, t.release_year DESC, t.name
+		LIMIT ?`
 )
 
 const (
