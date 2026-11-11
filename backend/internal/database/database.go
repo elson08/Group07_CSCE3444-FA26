@@ -169,6 +169,10 @@ func (d *Database) SavedTitles(ctx context.Context, userID int64) ([]model.Title
 	return d.queryTitles(ctx, savedTitlesQuery, userID)
 }
 
+func (d *Database) RecommendedTitles(ctx context.Context, userID int64, limit int) ([]model.Title, error) {
+	return d.queryTitles(ctx, recommendedTitlesQuery, userID, userID, userID, limit)
+}
+
 // SaveTitle adds a title to a user’s saved list.
 func (d *Database) SaveTitle(ctx context.Context, userID, titleID int64) error {
 	_, err := d.conn.ExecContext(ctx, saveTitleQuery, userID, titleID)

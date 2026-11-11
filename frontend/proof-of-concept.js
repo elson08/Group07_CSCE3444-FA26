@@ -168,8 +168,16 @@ async function setupHomePage() {
 
     let matchingMovies = [];
     try {
-        const query = new URLSearchParams({ q: searchText, limit: searchText ? 50 : 8 });
-        const titles = await fetchAPI(`/titles?${query}`);
+        let titles = [];
+        if (!searchText) {
+            titles = await fetchAPI("/me/recommendations").catch(() => []);
+        }
+
+        if (titles.length === 0) {
+            const query = new URLSearchParams({ q: searchText, limit: searchText ? 50 : 8 });
+            titles = await fetchAPI(`/titles?${query}`);
+        }
+
         matchingMovies = titles.map(titleToMovie);
         emptyState.textContent = "No movies found. Try another title.";
     } catch {
@@ -270,7 +278,8 @@ async function setupMoviePage() {
     const id = new URLSearchParams(window.location.search).get("id");
 
     let movie = getMovieById(id);
-    if (!movie) {
+    const fromAPI = !movie;
+    if (fromAPI) {
         try {
             movie = titleToMovie(await fetchAPI(`/titles/${encodeURIComponent(id)}`));
         } catch {
@@ -293,8 +302,13 @@ async function setupMoviePage() {
             <h1>${escapeHTML(movie.title)}</h1>
             <strong>${escapeHTML(movie.year)} · ${escapeHTML(movie.genre)}</strong>
             <p>${escapeHTML(movie.description)}</p>
+            ${fromAPI ? '<div class="add-to-profile"><button id="saveButton" type="button" disabled>Save to profile</button></div>' : ""}
         </div>
     `;
+
+    if (fromAPI) {
+        setupSaveButton(id);
+    }
 
     const subscriptionList = document.querySelector("#subscriptionList");
     subscriptionList.innerHTML = movie.subscriptions
@@ -305,6 +319,41 @@ async function setupMoviePage() {
     if (trailerSrc) {
         document.querySelector("#trailer").src = trailerSrc;
     }
+}
+
+async function setupSaveButton(id) {
+    const button = document.querySelector("#saveButton");
+
+    let saved;
+    try {
+        const savedTitles = await fetchAPI("/me/titles");
+        saved = savedTitles.some((title) => String(title.id) === id);
+    } catch {
+        button.textContent = "Sign in to save";
+        button.disabled = false;
+        button.addEventListener("click", () => window.location.assign("signin.html"));
+        return;
+    }
+
+    const showState = () => {
+        button.textContent = saved ? "Remove from profile" : "Save to profile";
+    };
+
+    showState();
+    button.disabled = false;
+
+    button.addEventListener("click", async () => {
+        button.disabled = true;
+        try {
+            const response = await fetch(`/api/me/titles/${encodeURIComponent(id)}`, { method: saved ? "DELETE" : "PUT" });
+            if (response.ok) {
+                saved = !saved;
+                showState();
+            }
+        } finally {
+            button.disabled = false;
+        }
+    });
 }
 
 

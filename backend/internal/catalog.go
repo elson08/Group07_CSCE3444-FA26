@@ -104,6 +104,26 @@ func (s *Server) listSavedTitles(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, titles)
 }
 
+func (s *Server) listRecommendations(w http.ResponseWriter, r *http.Request) {
+	user, ok := s.requireUser(w, r)
+	if !ok {
+		return
+	}
+
+	const limit = 8
+	titles, err := s.database.RecommendedTitles(r.Context(), user.ID, limit)
+	if err == nil && s.fillDetails(r.Context(), titles) {
+		titles, err = s.database.RecommendedTitles(r.Context(), user.ID, limit)
+	}
+
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, "could not load recommendations")
+		return
+	}
+
+	writeJSON(w, http.StatusOK, titles)
+}
+
 // saveTitle adds a title to the signed-in user’s list.
 func (s *Server) saveTitle(w http.ResponseWriter, r *http.Request) {
 	user, ok := s.requireUser(w, r)
