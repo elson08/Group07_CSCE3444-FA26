@@ -22,13 +22,14 @@ import (
 // Server owns the HTTP router, listener, and database dependency.
 type Server struct {
 	database   *database.Database
+	tmdb       *tmdbClient
 	mux        *http.ServeMux
 	httpServer *http.Server
 }
 
 // NewServer builds the API server from its database and configuration.
 func NewServer(db *database.Database, cfg config.Config) *Server {
-	server := &Server{database: db, mux: http.NewServeMux()}
+	server := &Server{database: db, tmdb: newTMDBClient(cfg.TMDBToken), mux: http.NewServeMux()}
 	server.httpServer = &http.Server{
 		Addr:              cfg.ListenAddress(),
 		Handler:           server,

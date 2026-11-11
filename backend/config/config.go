@@ -10,9 +10,10 @@ import (
 
 // Config holds the listener address and SQLite path.
 type Config struct {
-	Address string `json:"address"`
-	Port    int    `json:"port"`
-	DbPath  string `json:"db"`
+	Address   string `json:"address"`
+	Port      int    `json:"port"`
+	DbPath    string `json:"db"`
+	TMDBToken string `json:"tmdb_token"`
 }
 
 // DefaultConfig returns local development settings.

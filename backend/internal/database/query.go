@@ -36,7 +36,7 @@ const (
 		FROM titles t
 		WHERE (? = '' OR t.name LIKE '%' || ? || '%')
 			AND (? = '' OR t.kind = ?)
-		ORDER BY t.name
+		ORDER BY t.release_year DESC, t.name
 		LIMIT ? OFFSET ?`
 
 	titleByIDQuery = `SELECT ` + titleColumns + `
@@ -82,6 +82,18 @@ const (
 		RETURNING id`
 
 	linkTitleGenreQuery = `INSERT INTO title_genres (title_id, genre_id)
+		VALUES (?, ?)`
+
+	saveTitleDetailsQuery = `UPDATE titles
+		SET synopsis = ?, poster_url = NULLIF(?, ''), trailer_url = NULLIF(?, '')
+		WHERE id = ?`
+
+	upsertServiceQuery = `INSERT INTO services (name)
+		VALUES (?)
+		ON CONFLICT(name) DO UPDATE SET name = excluded.name
+		RETURNING id`
+
+	linkTitleServiceQuery = `INSERT OR IGNORE INTO title_services (title_id, service_id)
 		VALUES (?, ?)`
 )
 

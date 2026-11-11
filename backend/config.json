@@ -1,5 +1,6 @@
 {
   "address": "localhost",
   "port": 8080,
-  "db": "data/local.sqlite"
+  "db": "data/local.sqlite",
+  "tmdb_token": "eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI4NWM4OWRhYjg2ZDA5YWJhZjg1NmVhYThjYmY5ZGNhOSIsIm5iZiI6MTc5NDI0MDUyNS40NjEsInN1YiI6IjZhZjFmMDBkOTQwNjg4YjVmM2M3MmI3NiIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.6evo7hYnly16cXhks00GN9aZeB6PrNo8MGqPWQqDccQ"
 }
