@@ -260,9 +260,61 @@ section {
     display: grid;
     align-content: start;
     gap: 10px;
-    height: 330px;
+    min-height: 270px;
+    max-height: 330px;
     overflow-y: auto;
-    padding-right: 4px;
+    padding: 8px 4px 4px 0;
+}
+
+/* Empty collection styling */
+.empty-list {
+    min-height: 245px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 22px 16px;
+    color: var(--extraTextColor);
+    text-align: center;
+    border: 1px dashed var(--border);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.015);
+}
+
+.empty-list strong {
+    color: var(--textColor);
+    font-size: 0.95rem;
+}
+
+.empty-list span:last-child {
+    max-width: 230px;
+    font-size: 0.82rem;
+    line-height: 1.5;
+}
+
+.empty-list .empty-list-icon {
+    display: grid;
+    place-items: center;
+    width: 46px;
+    height: 46px;
+    margin-bottom: 2px;
+    color: var(--highlightColor);
+    background: rgba(21, 173, 233, 0.10);
+    border: 1px solid rgba(21, 173, 233, 0.22);
+    border-radius: 14px;
+    font-size: 1.35rem;
+}
+
+/* Collection entries */
+.list-entry {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    padding: 9px;
+    background: rgba(255, 255, 255, 0.025);
+    border: 1px solid rgba(255, 255, 255, 0.045);
+    border-radius: 10px;
 }
 
 .list-entry {
@@ -471,3 +523,33 @@ section {
     border: 0;
 }
 
+.profile-search-results {
+    display: grid;
+    gap: 4px;
+    max-height: 190px;
+    overflow-y: auto;
+    margin: -7px 0 10px;
+    padding: 6px;
+    background: var(--mainColor);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+}
+
+.profile-search-results[hidden] {
+    display: none;
+}
+
+.profile-search-option {
+    padding: 8px 10px;
+    text-align: left;
+    color: var(--textColor);
+    background: transparent;
+    border: 0;
+    border-radius: 6px;
+    font: inherit;
+    cursor: pointer;
+}
+
+.profile-search-option:hover {
+    background: var(--dividerColor);
+}

@@ -30,7 +30,8 @@
         <h1 id="profileName">Loading account...</h1>
         <p id="profileEmail" class="extraText"></p>
         <p id="sessionMessage" class="form-message" aria-live="polite"></p>
-        <p class="extraText">The lists below show sample data and are not connected to your account yet.</p>
+        <p class="extraText">Manage the movies, shows, and streaming services saved to your account.</p>
+        <p id="profileCollectionsMessage" class="form-message" aria-live="polite"></p>
 
         <!-- The area that keeps the 3 lists of Movies, Shows and Subscriptions tied to the User's account -->
         <div class="lists-grid">
@@ -48,7 +49,7 @@
                     >
 
                     <!-- Currently does nothing -->
-                    <button>
+                    <button type="button" disabled>
                         Add
                     </button>
                 </div>
@@ -71,7 +72,7 @@
                     >
 
                     <!-- Currently does nothing -->
-                    <button>
+                    <button type="button" disabled>
                         Add
                     </button>
                 </div>
@@ -93,15 +94,15 @@
                         placeholder="Search for a subscription service..."
                     >
 
-                    <!-- Currently does nothing -->
-                    <button>
+                    
+                    <button type="button" disabled>
                         Add
                     </button>
                 </div>
                 
                 <!-- Populates using JavaScript that will be tied to what Subscriptions 
                     the User already has attached to their account. -->
-                <!-- Currently does nothing -->
+                
                 <div id="subscriptions" class="scroll-list"></div>
             </section>
 
