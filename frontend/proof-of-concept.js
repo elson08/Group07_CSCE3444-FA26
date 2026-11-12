@@ -218,50 +218,416 @@ function setupSearch() {
     });
 }
 
+// /**
+//  * setting up a placeholder user
+//  */
+// function setupProfilePage() {
+//     const collections = {
+//         movies: ["dune2", "arrival", "inception", "matrix", "oppenheimer"],
+//         shows: ["interstellar", "batman", "spiderverse"],
+//         subscriptions: []
+//     };
+
+//     Object.entries(collections).forEach(([containerId, movieIds]) => {
+//         const container = document.getElementById(containerId);
+
+//         if (!container) {
+//             return;
+//         }
+
+//         container.innerHTML = movieIds
+//             .map((movieId) => {
+//                 const movie = getMovieById(movieId);
+
+//                 return `
+//                     <div class="list-entry">
+//                         <img
+//                             src="${movie.poster}"
+//                             alt=""
+//                             onerror="this.src='https://placehold.co/100x150/222c3d/ffffff?text=Poster'"
+//                         >
+
+//                         <a href="movie.html?id=${movie.id}">
+//                             ${movie.title}
+//                         </a>
+
+//                         <button
+//                             type="button"
+//                             class="delete-movie"
+//                         >
+//                             X
+//                         </button>
+//                     </div>
+//                 `;
+//             })
+//             .join("");
+//     });
+// }
+
 /**
- * setting up a placeholder user
+ * Send requests for the signed-in user's profile collections.
+ * The existing backend routes use the session cookie to identify the user.
  */
-function setupProfilePage() {
-    const collections = {
-        movies: ["dune2", "arrival", "inception", "matrix", "oppenheimer"],
-        shows: ["interstellar", "batman", "spiderverse"],
-        subscriptions: []
-    };
+async function profileRequest(path, method = "GET") {
+    const response = await fetch(`/api${path}`, {
+        method,
+        credentials: "same-origin",
+        cache: "no-store"
+    });
 
-    Object.entries(collections).forEach(([containerId, movieIds]) => {
-        const container = document.getElementById(containerId);
+    if (response.status === 204) {
+        return null;
+    }
 
-        if (!container) {
+    const contentType = response.headers.get("Content-Type") || "";
+    const data = contentType.includes("application/json")
+        ? await response.json()
+        : null;
+
+    if (!response.ok) {
+        throw new Error(data?.error || `Request failed (${response.status}).`);
+    }
+
+    return data;
+}
+
+// Display one title from the database in the Movies or Shows collection.
+function createProfileTitleEntry(title) {
+    const poster = title.poster_url ||
+        "https://placehold.co/100x150/222c3d/ffffff?text=Poster";
+    const year = title.release_year ? ` · ${title.release_year}` : "";
+
+    return `
+        <article class="list-entry">
+            <img src="${escapeHTML(poster)}"
+                 alt="${escapeHTML(title.name)} poster"
+                 loading="lazy"
+                 onerror="this.src='https://placehold.co/100x150/222c3d/ffffff?text=Poster'">
+            <a href="movie.html?id=${encodeURIComponent(title.id)}">
+                ${escapeHTML(title.name)}${year}
+            </a>
+            <button type="button" class="delete-movie"
+                    data-remove-title="${title.id}"
+                    aria-label="Remove ${escapeHTML(title.name)}">
+                X
+            </button>
+        </article>
+    `;
+}
+
+/** Display one streaming service from the database. */
+function createProfileServiceEntry(service) {
+    return `
+        <article class="list-entry service-entry">
+            <span>${escapeHTML(service.name)}</span>
+            <button type="button" class="delete-movie"
+                    data-remove-service="${service.id}"
+                    aria-label="Remove ${escapeHTML(service.name)}">
+                Remove
+            </button>
+        </article>
+    `;
+}
+
+/**
+ * Connect one profile search box to the existing catalog API.
+ * The user must select an actual database result before pressing Add.
+ */
+function setupProfileSearch({ inputId, kind, addPath, searchPath, onAdded }) {
+    const input = document.getElementById(inputId);
+    if (!input) return;
+
+    const addButton = input.parentElement.querySelector("button");
+    const results = document.createElement("div");
+    results.className = "profile-search-results";
+    results.hidden = true;
+    input.parentElement.insertAdjacentElement("afterend", results);
+
+    const message = document.createElement("p");
+    message.className = "form-message profile-list-message";
+    message.setAttribute("aria-live", "polite");
+    results.insertAdjacentElement("afterend", message);
+
+    let matches = [];
+    let selected = null;
+    let requestNumber = 0;
+
+    function clearSelection() {
+        selected = null;
+        if (addButton) addButton.disabled = true;
+    }
+
+    function showResults(items, labelForItem) {
+        matches = items;
+        results.replaceChildren();
+        results.hidden = items.length === 0;
+
+        items.forEach((item, index) => {
+            const option = document.createElement("button");
+            option.type = "button";
+            option.className = "profile-search-option";
+            option.textContent = labelForItem(item);
+            option.addEventListener("click", () => {
+                selected = matches[index];
+                input.value = labelForItem(selected);
+                results.hidden = true;
+                message.textContent = `Selected ${labelForItem(selected)}.`;
+                if (addButton) addButton.disabled = false;
+            });
+            results.append(option);
+        });
+    }
+
+    input.addEventListener("input", async () => {
+        const query = input.value.trim();
+        const currentRequest = ++requestNumber;
+        clearSelection();
+        message.textContent = "";
+
+        if (!query) {
+            results.hidden = true;
+            results.replaceChildren();
             return;
         }
 
-        container.innerHTML = movieIds
-            .map((movieId) => {
-                const movie = getMovieById(movieId);
+        try {
+            let items;
+            if (kind === "service") {
+                const allServices = await profileRequest("/services");
+                items = allServices.filter(service =>
+                    service.name.toLowerCase().includes(query.toLowerCase())
+                ).slice(0, 10);
+            } else {
+                const params = new URLSearchParams({ q: query, kind, limit: "10" });
+                items = await profileRequest(`/titles?${params.toString()}`);
+            }
 
-                return `
-                    <div class="list-entry">
-                        <img
-                            src="${movie.poster}"
-                            alt=""
-                            onerror="this.src='https://placehold.co/100x150/222c3d/ffffff?text=Poster'"
-                        >
+            // Ignore an older search if the user has already typed something else.
+            if (currentRequest !== requestNumber) return;
 
-                        <a href="movie.html?id=${movie.id}">
-                            ${movie.title}
-                        </a>
+            showResults(items, item => kind === "service"
+                ? item.name
+                : `${item.name}${item.release_year ? ` (${item.release_year})` : ""}`);
 
-                        <button
-                            type="button"
-                            class="delete-movie"
-                        >
-                            X
-                        </button>
+            if (items.length === 0) {
+                message.textContent = "No matching results found.";
+            }
+        } catch (error) {
+            if (currentRequest === requestNumber) {
+                results.hidden = true;
+                message.textContent = error.message;
+            }
+        }
+    });
+
+    addButton?.addEventListener("click", async () => {
+        if (!selected) {
+            message.textContent = "Search and select an item before adding it.";
+            return;
+        }
+
+        const item = selected;
+        addButton.disabled = true;
+        try {
+            await profileRequest(`${addPath}/${item.id}`, "PUT");
+            input.value = "";
+            selected = null;
+            results.hidden = true;
+            results.replaceChildren();
+            message.textContent = `${item.name} added to your profile.`;
+            await onAdded();
+        } catch (error) {
+            message.textContent = error.message;
+        } finally {
+            addButton.disabled = !selected;
+        }
+    });
+
+    input.addEventListener("keydown", event => {
+        if (event.key === "Enter") {
+            event.preventDefault();
+            if (selected) addButton?.click();
+            else message.textContent = "Choose an item from the search results first.";
+        }
+    });
+
+    if (addButton) addButton.disabled = true;
+}
+
+/** Load and render all three database-backed profile collections. */
+async function setupProfilePage() {
+    const moviesContainer = document.getElementById("movies");
+    const showsContainer = document.getElementById("shows");
+    const subscriptionsContainer = document.getElementById("subscriptions");
+
+    // This script is also included on pages other than profile.html.
+    if (!moviesContainer || !showsContainer || !subscriptionsContainer) return;
+
+    const pageMessage = document.getElementById("profileCollectionsMessage");
+
+    async function loadCollections() {
+        if (pageMessage) {
+            pageMessage.textContent = "Loading your collections...";
+        }
+
+        try {
+            const [titlesResponse, servicesResponse] = await Promise.all([
+                profileRequest("/me/titles"),
+                profileRequest("/me/services")
+            ]);
+
+            // Make sure empty database responses are treated as empty arrays.
+            const savedTitles = Array.isArray(titlesResponse)
+                ? titlesResponse
+                : [];
+
+            const savedServices = Array.isArray(servicesResponse)
+                ? servicesResponse
+                : [];
+
+            // Separate movies and shows.
+            const savedMovies = savedTitles.filter(
+                title => title.kind === "movie"
+            );
+
+            const savedShows = savedTitles.filter(
+                title => title.kind === "show"
+            );
+
+            // Display movies or an empty-state message.
+            moviesContainer.innerHTML = savedMovies.length
+                ? savedMovies.map(createProfileTitleEntry).join("")
+                : `
+                    <div class="empty-list">
+                        <span class="empty-list-icon" aria-hidden="true">▣</span>
+                        <strong>Your movie collection is empty</strong>
+                        <span>Search for a movie above to start building your collection.</span>
                     </div>
                 `;
-            })
-            .join("");
+
+            // Display shows or an empty-state message.
+            showsContainer.innerHTML = savedShows.length
+                ? savedShows.map(createProfileTitleEntry).join("")
+                : `
+                    <div class="empty-list">
+                        <span class="empty-list-icon" aria-hidden="true">▤</span>
+                        <strong>No shows added yet</strong>
+                        <span>Find your favorite TV shows and keep them here.</span>
+                    </div>
+                `;
+
+            // Display subscriptions or an empty-state message.
+            subscriptionsContainer.innerHTML = savedServices.length
+                ? savedServices.map(createProfileServiceEntry).join("")
+                : `
+                    <div class="empty-list">
+                        <span class="empty-list-icon" aria-hidden="true">☆</span>
+                        <strong>No subscriptions added</strong>
+                        <span>Add the streaming services you use to keep them together.</span>
+                    </div>
+                `;
+
+            // Remove movie buttons.
+            moviesContainer.querySelectorAll("[data-remove-title]").forEach(button => {
+                button.addEventListener("click", async () => {
+                    button.disabled = true;
+
+                    try {
+                        await profileRequest(
+                            `/me/titles/${button.dataset.removeTitle}`,
+                            "DELETE"
+                        );
+
+                        await loadCollections();
+                    } catch (error) {
+                        if (pageMessage) {
+                            pageMessage.textContent = error.message;
+                        }
+
+                        button.disabled = false;
+                    }
+                });
+            });
+
+            // Remove show buttons.
+            showsContainer.querySelectorAll("[data-remove-title]").forEach(button => {
+                button.addEventListener("click", async () => {
+                    button.disabled = true;
+
+                    try {
+                        await profileRequest(
+                            `/me/titles/${button.dataset.removeTitle}`,
+                            "DELETE"
+                        );
+
+                        await loadCollections();
+                    } catch (error) {
+                        if (pageMessage) {
+                            pageMessage.textContent = error.message;
+                        }
+
+                        button.disabled = false;
+                    }
+                });
+            });
+
+            // Remove subscription buttons.
+            subscriptionsContainer.querySelectorAll("[data-remove-service]").forEach(button => {
+                button.addEventListener("click", async () => {
+                    button.disabled = true;
+
+                    try {
+                        await profileRequest(
+                            `/me/services/${button.dataset.removeService}`,
+                            "DELETE"
+                        );
+
+                        await loadCollections();
+                    } catch (error) {
+                        if (pageMessage) {
+                            pageMessage.textContent = error.message;
+                        }
+
+                        button.disabled = false;
+                    }
+                });
+            });
+
+            if (pageMessage) {
+                pageMessage.textContent = "";
+            }
+
+        } catch (error) {
+            if (pageMessage) {
+                pageMessage.textContent =
+                    `${error.message} Make sure you are signed in, then refresh the page.`;
+            }
+        }
+    }
+
+    // These routes already exist in the Go backend; no new backend endpoints are needed.
+    setupProfileSearch({
+        inputId: "movieSearch",
+        kind: "movie",
+        addPath: "/me/titles",
+        onAdded: loadCollections
     });
+
+    setupProfileSearch({
+        inputId: "showSearch",
+        kind: "show",
+        addPath: "/me/titles",
+        onAdded: loadCollections
+    });
+
+    setupProfileSearch({
+        inputId: "subscriptionSearch",
+        kind: "service",
+        addPath: "/me/services",
+        onAdded: loadCollections
+    });
+
+    await loadCollections();
 }
 
 /**
