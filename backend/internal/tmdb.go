@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"strings"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -126,7 +127,9 @@ func (c *tmdbClient) lookup(ctx context.Context, imdbID, kind string) (model.Tit
 	}
 
 	for _, provider := range providers.Results[tmdbRegion].Flatrate {
-		details.Services = append(details.Services, provider.Name)
+		if !strings.Contains(strings.ToLower(provider.Name), "channel") {
+			details.Services = append(details.Services, provider.Name)
+		}
 	}
 
 	return details, nil
