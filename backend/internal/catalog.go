@@ -3,45 +3,35 @@ package internal
 import (
 	"database/sql"
 	"errors"
+	"fmt"
 	"net/http"
 	"strconv"
 	"strings"
 
+	"github.com/elson08/Group07_CSCE3444-FA26/backend/internal/database"
 	"github.com/elson08/Group07_CSCE3444-FA26/backend/internal/database/model"
 )
 
 // listTitles searches the public title catalog.
 func (s *Server) listTitles(w http.ResponseWriter, r *http.Request) {
-	query := strings.TrimSpace(r.URL.Query().Get("q"))
-	kind := r.URL.Query().Get("kind")
-
-	if kind != "" && kind != model.KindMovie && kind != model.KindShow {
-		writeError(w, http.StatusBadRequest, "kind must be movie or show")
+	filter, err := s.titleFilter(r)
+	if errors.Is(err, errSignInRequired) {
+		writeError(w, http.StatusUnauthorized, err.Error())
 		return
 	}
 
-	limit, offset := 20, 0
-	if raw := r.URL.Query().Get("limit"); raw != "" {
-		value, err := strconv.Atoi(raw)
-		if err != nil || value < 1 || value > 50 {
-			writeError(w, http.StatusBadRequest, "limit must be 1-50")
-			return
-		}
-		limit = value
+	if err != nil {
+		writeError(w, http.StatusBadRequest, err.Error())
+		return
 	}
 
-	if raw := r.URL.Query().Get("offset"); raw != "" {
-		value, err := strconv.Atoi(raw)
-		if err != nil || value < 0 {
-			writeError(w, http.StatusBadRequest, "offset must be nonnegative")
-			return
-		}
-		offset = value
-	}
-
-	titles, err := s.database.ListTitles(r.Context(), query, kind, limit, offset)
+	titles, total, err := s.database.BrowseTitles(r.Context(), filter)
 	if err == nil && s.fillDetails(r.Context(), titles) {
-		titles, err = s.database.ListTitles(r.Context(), query, kind, limit, offset)
+		titles, total, err = s.database.BrowseTitles(r.Context(), filter)
+	}
+
+	if err == nil {
+		err = s.database.AttachServices(r.Context(), titles)
 	}
 
 	if err != nil {
@@ -49,7 +39,88 @@ func (s *Server) listTitles(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	w.Header().Set("X-Total-Count", strconv.Itoa(total))
 	writeJSON(w, http.StatusOK, titles)
+}
+
+var errSignInRequired = errors.New("sign in to filter by your services")
+
+func (s *Server) titleFilter(r *http.Request) (model.TitleFilter, error) {
+	values := r.URL.Query()
+	filter := model.TitleFilter{
+		Query: strings.TrimSpace(values.Get("q")),
+		Kind:  values.Get("kind"),
+		Sort:  values.Get("sort"),
+		Limit: 20,
+	}
+
+	if filter.Kind != "" && filter.Kind != model.KindMovie && filter.Kind != model.KindShow {
+		return filter, errors.New("kind must be movie or show")
+	}
+
+	if filter.Sort != "" && !database.ValidSort(filter.Sort) {
+		return filter, errors.New("sort must be newest, oldest, top, or az")
+	}
+
+	for _, genre := range values["genre"] {
+		if genre = strings.TrimSpace(genre); genre != "" {
+			filter.Genres = append(filter.Genres, genre)
+		}
+	}
+
+	for _, raw := range values["service"] {
+		id, err := strconv.ParseInt(raw, 10, 64)
+		if err != nil || id <= 0 {
+			return filter, errors.New("service must be a service id")
+		}
+		filter.ServiceIDs = append(filter.ServiceIDs, id)
+	}
+
+	if len(filter.Genres) > 30 || len(filter.ServiceIDs) > 30 {
+		return filter, errors.New("too many filters")
+	}
+
+	if values.Get("mine") == "1" {
+		user, err := s.currentUser(r)
+		if err != nil {
+			return filter, errSignInRequired
+		}
+		filter.ServicesOfUser = user.ID
+	}
+
+	numbers := []struct {
+		name     string
+		min, max int
+		target   *int
+	}{
+		{"limit", 1, 50, &filter.Limit},
+		{"offset", 0, 100000, &filter.Offset},
+		{"year_from", 1800, 2100, &filter.YearFrom},
+		{"year_to", 1800, 2100, &filter.YearTo},
+	}
+
+	for _, number := range numbers {
+		raw := values.Get(number.name)
+		if raw == "" {
+			continue
+		}
+
+		value, err := strconv.Atoi(raw)
+		if err != nil || value < number.min || value > number.max {
+			return filter, fmt.Errorf("%s must be %d-%d", number.name, number.min, number.max)
+		}
+		*number.target = value
+	}
+
+	if raw := values.Get("min_rating"); raw != "" {
+		value, err := strconv.ParseFloat(raw, 64)
+		if err != nil || value < 0 || value > 5 {
+			return filter, errors.New("min_rating must be 0-5")
+		}
+		filter.MinRating = value
+	}
+
+	return filter, nil
 }
 
 // getTitle returns a title with its details.
@@ -96,6 +167,10 @@ func (s *Server) listSavedTitles(w http.ResponseWriter, r *http.Request) {
 	}
 
 	titles, err := s.database.SavedTitles(r.Context(), user.ID)
+	if err == nil {
+		err = s.database.AttachServices(r.Context(), titles)
+	}
+
 	if err != nil {
 		writeError(w, http.StatusInternalServerError, "could not list saved titles")
 		return
@@ -114,6 +189,10 @@ func (s *Server) listRecommendations(w http.ResponseWriter, r *http.Request) {
 	titles, err := s.database.RecommendedTitles(r.Context(), user.ID, limit)
 	if err == nil && s.fillDetails(r.Context(), titles) {
 		titles, err = s.database.RecommendedTitles(r.Context(), user.ID, limit)
+	}
+
+	if err == nil {
+		err = s.database.AttachServices(r.Context(), titles)
 	}
 
 	if err != nil {
