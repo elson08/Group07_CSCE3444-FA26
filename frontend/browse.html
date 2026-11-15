@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>7Movies Browse</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header class="topbar">
+        <a class="brand" href="index.html">7Movies</a>
+        <nav class="site-nav">
+            <a href="index.html">Home</a>
+            <a class="active" href="browse.html">Browse</a>
+            <a href="profile.html#watchlist">Watchlist</a>
+        </nav>
+        <form class="search" action="browse.html">
+            <input id="headerSearch" name="q" type="search" placeholder="Search movies and shows" aria-label="Search movies and shows">
+            <button type="submit" aria-label="Search">⌕</button>
+        </form>
+        <div class="header-account" data-account></div>
+    </header>
+
+    <main class="container">
+        <div class="page-head">
+            <h1>Browse</h1>
+            <p id="catalogSize" class="extraText"></p>
+        </div>
+
+        <div class="browse-layout">
+            <form id="filters" class="filters panel">
+                <h2>Filters</h2>
+                <input type="hidden" name="q">
+
+                <div class="filter-group">
+                    <h3>Type</h3>
+                    <div class="segmented">
+                        <label><input type="radio" name="kind" value="" checked><span>All</span></label>
+                        <label><input type="radio" name="kind" value="movie"><span>Movies</span></label>
+                        <label><input type="radio" name="kind" value="show"><span>Shows</span></label>
+                    </div>
+                </div>
+
+                <div class="filter-group">
+                    <h3>Streaming</h3>
+                    <label id="mineOption" class="check" hidden><input type="checkbox" name="mine" value="1"> Only my services</label>
+                    <div id="serviceOptions" class="check-list"></div>
+                </div>
+
+                <div class="filter-group">
+                    <h3>Genres</h3>
+                    <div id="genreOptions" class="chip-row"></div>
+                </div>
+
+                <div class="filter-group">
+                    <h3>Release year</h3>
+                    <div class="range-row">
+                        <input type="number" name="year_from" min="1800" max="2100" placeholder="From" aria-label="From year">
+                        <span>to</span>
+                        <input type="number" name="year_to" min="1800" max="2100" placeholder="To" aria-label="To year">
+                    </div>
+                </div>
+
+                <div class="filter-group">
+                    <h3>Minimum 7Movies rating</h3>
+                    <input type="range" name="min_rating" min="0" max="5" step="0.5" value="0" aria-label="Minimum rating">
+                    <span id="minRatingLabel" class="rating">Any rating</span>
+                </div>
+
+                <button class="btn btn-primary full" type="submit">Apply filters</button>
+                <a class="btn btn-ghost full" href="browse.html">Reset</a>
+            </form>
+
+            <section class="results">
+                <div class="results-head">
+                    <p id="resultSummary"></p>
+                    <label>
+                        Sort by
+                        <select name="sort" form="filters">
+                            <option value="newest">Newest</option>
+                            <option value="oldest">Oldest</option>
+                            <option value="top">Top rated</option>
+                            <option value="az">A to Z</option>
+                        </select>
+                    </label>
+                </div>
+
+                <div id="activeFilters" class="chip-row"></div>
+                <div id="results" class="results-grid"></div>
+                <nav id="pagination" class="pagination" aria-label="Pages"></nav>
+            </section>
+        </div>
+    </main>
+
+    <footer class="site-footer">
+        <div class="footer-links">
+            <a href="index.html">Home</a>
+            <a href="browse.html">Browse</a>
+            <a href="profile.html">Profile</a>
+        </div>
+        <p>Information courtesy of IMDb (https://www.imdb.com). Used with permission.</p>
+        <p>This website uses TMDB and the TMDB APIs but is not endorsed, certified, or otherwise approved by TMDB.</p>
+        <p>Streaming availability data provided by JustWatch.</p>
+    </footer>
+
+    <script src="app.js"></script>
+    <script src="browse.js"></script>
+</body>
+</html>
