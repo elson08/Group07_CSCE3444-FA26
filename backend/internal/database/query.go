@@ -30,14 +30,9 @@ const (
 // Title and saved-title queries.
 const (
 	titleColumns = `t.id, t.provider_id, t.kind, t.name,
-		t.release_year, t.synopsis, t.poster_url, t.trailer_url`
-
-	listTitlesQuery = `SELECT ` + titleColumns + `
-		FROM titles t
-		WHERE (? = '' OR t.name LIKE '%' || ? || '%')
-			AND (? = '' OR t.kind = ?)
-		ORDER BY t.release_year DESC, t.name
-		LIMIT ? OFFSET ?`
+		t.release_year, t.synopsis, t.poster_url, t.trailer_url,
+		(SELECT ROUND(AVG(r.stars), 1) FROM ratings r WHERE r.title_id = t.id),
+		(SELECT COUNT(*) FROM ratings r WHERE r.title_id = t.id)`
 
 	titleByIDQuery = `SELECT ` + titleColumns + `
 		FROM titles t
@@ -61,7 +56,7 @@ const (
 		FROM titles t
 		JOIN user_titles ut ON ut.title_id = t.id
 		WHERE ut.user_id = ?
-		ORDER BY t.name`
+		ORDER BY ut.rowid DESC`
 
 	saveTitleQuery = `INSERT OR IGNORE INTO user_titles (user_id, title_id)
 		VALUES (?, ?)`
@@ -69,12 +64,16 @@ const (
 	removeTitleQuery = `DELETE FROM user_titles
 		WHERE user_id = ? AND title_id = ?`
 
-	recommendedTitlesQuery = `WITH liked AS (
-			SELECT tg.genre_id, COUNT(*) AS weight
-			FROM user_titles ut
-			JOIN title_genres tg ON tg.title_id = ut.title_id
-			WHERE ut.user_id = ?
+	recommendedTitlesQuery = `WITH signals AS (
+			SELECT title_id, 1 AS weight FROM user_titles WHERE user_id = ?
+			UNION ALL
+			SELECT title_id, stars - 3 FROM ratings WHERE user_id = ?
+		), liked AS (
+			SELECT tg.genre_id, SUM(s.weight) AS weight
+			FROM signals s
+			JOIN title_genres tg ON tg.title_id = s.title_id
 			GROUP BY tg.genre_id
+			HAVING SUM(s.weight) > 0
 		), scored AS (
 			SELECT tg.title_id, SUM(l.weight) AS score
 			FROM title_genres tg
@@ -85,6 +84,8 @@ const (
 		FROM scored s
 		JOIN titles t ON t.id = s.title_id
 		WHERE t.id NOT IN (SELECT title_id FROM user_titles WHERE user_id = ?)
+			AND t.id NOT IN (SELECT title_id FROM user_watched WHERE user_id = ?)
+			AND t.id NOT IN (SELECT title_id FROM ratings WHERE user_id = ?)
 		ORDER BY EXISTS(
 				SELECT 1
 				FROM title_services ts
@@ -120,6 +121,70 @@ const (
 
 	linkTitleServiceQuery = `INSERT OR IGNORE INTO title_services (title_id, service_id)
 		VALUES (?, ?)`
+)
+
+const (
+	listGenresQuery = `SELECT id, name FROM genres ORDER BY name`
+
+	similarTitlesQuery = `WITH source AS (
+			SELECT genre_id FROM title_genres WHERE title_id = ?
+		), scored AS (
+			SELECT tg.title_id, COUNT(*) AS score
+			FROM title_genres tg
+			JOIN source s ON s.genre_id = tg.genre_id
+			WHERE tg.title_id != ?
+			GROUP BY tg.title_id
+		)
+		SELECT ` + titleColumns + `
+		FROM scored sc
+		JOIN titles t ON t.id = sc.title_id
+		JOIN titles origin ON origin.id = ?
+		WHERE t.kind = origin.kind
+		ORDER BY sc.score DESC,
+			ABS(COALESCE(t.release_year, 0) - COALESCE(origin.release_year, 0)),
+			t.name
+		LIMIT ?`
+
+	titleStatusQuery = `SELECT
+			EXISTS(SELECT 1 FROM user_titles WHERE user_id = ?1 AND title_id = ?2),
+			EXISTS(SELECT 1 FROM user_watched WHERE user_id = ?1 AND title_id = ?2),
+			COALESCE((SELECT stars FROM ratings WHERE user_id = ?1 AND title_id = ?2), 0),
+			COALESCE((SELECT review FROM ratings WHERE user_id = ?1 AND title_id = ?2), '')`
+
+	upsertRatingQuery = `INSERT INTO ratings (user_id, title_id, stars, review)
+		VALUES (?, ?, ?, ?)
+		ON CONFLICT(user_id, title_id) DO UPDATE
+		SET stars = excluded.stars, review = excluded.review, updated_at = CURRENT_TIMESTAMP`
+
+	removeRatingQuery = `DELETE FROM ratings WHERE user_id = ? AND title_id = ?`
+
+	userRatingsQuery = `SELECT ` + titleColumns + `, ur.stars, ur.review, ur.updated_at
+		FROM ratings ur
+		JOIN titles t ON t.id = ur.title_id
+		WHERE ur.user_id = ?
+		ORDER BY ur.updated_at DESC`
+
+	titleReviewsQuery = `SELECT u.username, r.stars, r.review, r.updated_at
+		FROM ratings r
+		JOIN users u ON u.id = r.user_id
+		WHERE r.title_id = ? AND r.review != ''
+		ORDER BY r.updated_at DESC
+		LIMIT 50`
+
+	watchedTitlesQuery = `SELECT ` + titleColumns + `
+		FROM titles t
+		JOIN user_watched w ON w.title_id = t.id
+		WHERE w.user_id = ?
+		ORDER BY w.watched_at DESC, t.name`
+
+	markWatchedQuery = `INSERT OR IGNORE INTO user_watched (user_id, title_id)
+		VALUES (?, ?)`
+
+	unmarkWatchedQuery = `DELETE FROM user_watched WHERE user_id = ? AND title_id = ?`
+
+	updateUserQuery = `UPDATE users SET username = ?, email = ? WHERE id = ?`
+
+	updatePasswordQuery = `UPDATE users SET password_hash = ? WHERE id = ?`
 )
 
 // Streaming service and saved-service queries.

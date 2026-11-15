@@ -62,3 +62,37 @@ CREATE TABLE IF NOT EXISTS user_services (
     service_id INTEGER NOT NULL REFERENCES services(id) ON DELETE CASCADE,
     PRIMARY KEY (user_id, service_id)
 );
+
+CREATE TABLE IF NOT EXISTS ratings (
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    title_id INTEGER NOT NULL REFERENCES titles(id) ON DELETE CASCADE,
+    stars INTEGER NOT NULL CHECK (stars BETWEEN 1 AND 5),
+    review TEXT NOT NULL DEFAULT '',
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (user_id, title_id)
+);
+
+CREATE INDEX IF NOT EXISTS ratings_title_id ON ratings(title_id);
+
+CREATE TABLE IF NOT EXISTS user_watched (
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    title_id INTEGER NOT NULL REFERENCES titles(id) ON DELETE CASCADE,
+    watched_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (user_id, title_id)
+);
+
+CREATE INDEX IF NOT EXISTS title_genres_genre_id ON title_genres(genre_id);
+CREATE INDEX IF NOT EXISTS title_services_service_id ON title_services(service_id);
+CREATE INDEX IF NOT EXISTS titles_release_year ON titles(release_year);
+
+INSERT OR IGNORE INTO services (name) VALUES
+    ('Netflix'),
+    ('Hulu'),
+    ('Amazon Prime Video'),
+    ('HBO Max'),
+    ('Disney Plus'),
+    ('Paramount Plus Essential'),
+    ('Paramount Plus Premium'),
+    ('Peacock Premium'),
+    ('Peacock Premium Plus'),
+    ('Apple TV');

@@ -115,13 +115,28 @@ func (s *Server) registerRoutes() {
 	s.handle("POST /api/sessions", s.login)
 	s.handle("DELETE /api/sessions/current", s.logout)
 	s.handle("GET /api/me", s.me)
+	s.handle("PATCH /api/me", s.updateMe)
+	s.handle("DELETE /api/me", s.deleteMe)
+	s.handle("PUT /api/me/password", s.changePassword)
 
 	s.handle("GET /api/titles", s.listTitles)
 	s.handle("GET /api/titles/{id}", s.getTitle)
+	s.handle("GET /api/titles/{id}/similar", s.listSimilar)
+	s.handle("GET /api/titles/{id}/reviews", s.listReviews)
+	s.handle("GET /api/genres", s.listGenres)
 	s.handle("GET /api/services", s.listServices)
 
 	s.handle("GET /api/me/titles", s.listSavedTitles)
 	s.handle("GET /api/me/recommendations", s.listRecommendations)
+	s.handle("GET /api/me/titles/{id}", s.titleStatus)
+
+	s.handle("GET /api/me/ratings", s.listRatings)
+	s.handle("PUT /api/me/ratings/{id}", s.saveRating)
+	s.handle("DELETE /api/me/ratings/{id}", s.removeRating)
+
+	s.handle("GET /api/me/watched", s.listWatched)
+	s.handle("PUT /api/me/watched/{id}", s.markWatched)
+	s.handle("DELETE /api/me/watched/{id}", s.unmarkWatched)
 	s.handle("PUT /api/me/titles/{id}", s.saveTitle)
 	s.handle("DELETE /api/me/titles/{id}", s.removeTitle)
 
@@ -132,7 +147,11 @@ func (s *Server) registerRoutes() {
 	s.handle("/api/", func(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusNotFound, "endpoint not found")
 	})
-	s.mux.Handle("/", http.FileServer(http.Dir("../frontend")))
+	static := http.FileServer(http.Dir("../frontend"))
+	s.mux.Handle("/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Cache-Control", "no-cache")
+		static.ServeHTTP(w, r)
+	}))
 }
 
 // handle registers a route on the server router.

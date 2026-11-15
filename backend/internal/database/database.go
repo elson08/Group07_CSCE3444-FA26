@@ -111,11 +111,6 @@ func (d *Database) DeleteSession(ctx context.Context, hash string) error {
 	return err
 }
 
-// ListTitles searches the catalog with pagination.
-func (d *Database) ListTitles(ctx context.Context, query, kind string, limit, offset int) ([]model.Title, error) {
-	return d.queryTitles(ctx, listTitlesQuery, query, query, kind, kind, limit, offset)
-}
-
 // TitleByID loads a title with its genres and services.
 func (d *Database) TitleByID(ctx context.Context, id int64) (model.Title, error) {
 	title, err := scanTitle(d.conn.QueryRowContext(ctx, titleByIDQuery, id))
@@ -170,7 +165,7 @@ func (d *Database) SavedTitles(ctx context.Context, userID int64) ([]model.Title
 }
 
 func (d *Database) RecommendedTitles(ctx context.Context, userID int64, limit int) ([]model.Title, error) {
-	return d.queryTitles(ctx, recommendedTitlesQuery, userID, userID, userID, limit)
+	return d.queryTitles(ctx, recommendedTitlesQuery, userID, userID, userID, userID, userID, userID, limit)
 }
 
 // SaveTitle adds a title to a user’s saved list.
@@ -230,12 +225,16 @@ func scanUser(row rowScanner) (model.User, error) {
 // scanTitle reads a title from a database row.
 func scanTitle(row rowScanner) (model.Title, error) {
 	var title model.Title
-	err := row.Scan(
+	err := row.Scan(titleFields(&title)...)
+	return title, err
+}
+
+func titleFields(title *model.Title) []any {
+	return []any{
 		&title.ID, &title.ProviderID, &title.Kind, &title.Name,
 		&title.ReleaseYear, &title.Synopsis, &title.PosterURL, &title.TrailerURL,
-	)
-
-	return title, err
+		&title.RatingAverage, &title.RatingCount,
+	}
 }
 
 // queryTitles runs a query and reads its title rows.
@@ -289,7 +288,7 @@ func (d *Database) queryServices(ctx context.Context, query string, args ...any)
 	}
 	defer rows.Close()
 
-	var services []model.Service
+	services := []model.Service{}
 	for rows.Next() {
 		var service model.Service
 		if err := rows.Scan(&service.ID, &service.Name); err != nil {
