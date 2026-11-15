@@ -6,112 +6,126 @@
     <title>7Movies Profile</title>
     <link rel="stylesheet" href="styles.css">
 </head>
-
-<!-- Main body of the Profile Page -->
 <body>
-
-    <!-- This is the bar that runs across the top part of the site, houses only the Site Name on this page -->
     <header class="topbar">
-
-        <!-- Site Name -->
         <a class="brand" href="index.html">7Movies</a>
-        
-        <!-- A placeholder to take up space at the top, separating the site name from the sign out button -->
-        <div class="space-bar"></div>
-        
-        <!-- The session script connects this to backend logout. -->
-        <a class="nav-button" href="signin.html" data-session-link>Sign In</a>
+        <nav class="site-nav">
+            <a href="index.html">Home</a>
+            <a href="browse.html">Browse</a>
+            <a class="active" href="profile.html#watchlist">Watchlist</a>
+        </nav>
+        <form class="search" action="browse.html">
+            <input name="q" type="search" placeholder="Search movies and shows" aria-label="Search movies and shows">
+            <button type="submit" aria-label="Search">⌕</button>
+        </form>
+        <div class="header-account" data-account></div>
     </header>
 
-    <!-- Main section where all the account information will be displayed -->
     <main class="container">
+        <p id="pageMessage" class="no-results">Loading your profile...</p>
 
-        <!-- Account details come from GET /api/me. -->
-        <h1 id="profileName">Loading account...</h1>
-        <p id="profileEmail" class="extraText"></p>
-        <p id="sessionMessage" class="form-message" aria-live="polite"></p>
-        <p class="extraText">Manage the movies, shows, and streaming services saved to your account.</p>
-        <p id="profileCollectionsMessage" class="form-message" aria-live="polite"></p>
-
-        <!-- The area that keeps the 3 lists of Movies, Shows and Subscriptions tied to the User's account -->
-        <div class="lists-grid">
-
-            <!-- List for the Movies -->
-            <section class="list-panel">
-                <h2>Movies</h2>
-
-                <!-- Search Bar to search for any movies to add to the list. Currently does nothing -->
-                <div class="add-to-profile">
-                    <input
-                        type="text"
-                        id="movieSearch"
-                        placeholder="Search for a movie..."
-                    >
-
-                    <!-- Currently does nothing -->
-                    <button type="button" disabled>
-                        Add
-                    </button>
+        <div id="profilePage" hidden>
+            <section class="profile-head panel">
+                <span id="profileInitial" class="avatar large"></span>
+                <div>
+                    <h1 id="profileName"></h1>
+                    <p id="profileMeta" class="extraText"></p>
                 </div>
-
-                <!-- Populates using JavaScript that will be tied to what movies 
-                    the User already has attached to their account -->
-                <div id="movies" class="scroll-list"></div>
+                <div class="actions">
+                    <button id="signOut" class="btn btn-ghost" type="button">Sign out</button>
+                </div>
             </section>
 
-            <!-- List for the Shows -->
-            <section class="list-panel">
-                <h2>Shows</h2>
+            <nav class="tabs" role="tablist">
+                <button type="button" role="tab" data-tab="watchlist">Watchlist</button>
+                <button type="button" role="tab" data-tab="watched">Watched</button>
+                <button type="button" role="tab" data-tab="ratings">Ratings &amp; reviews</button>
+                <button type="button" role="tab" data-tab="services">My services</button>
+                <button type="button" role="tab" data-tab="account">Account</button>
+            </nav>
 
-                <!-- Search Bar to search for any shows to add to the list. Currently does nothing -->
-                <div class="add-to-profile">
-                    <input
-                        type="text"
-                        id="showSearch"
-                        placeholder="Search for a show..."
-                    >
-
-                    <!-- Currently does nothing -->
-                    <button type="button" disabled>
-                        Add
-                    </button>
+            <section id="watchlist" class="tab-panel" hidden>
+                <div class="search-add">
+                    <input id="watchlistSearch" class="field" type="search" placeholder="Add a title..." autocomplete="off" aria-label="Search for a title to add">
+                    <div id="watchlistResults" class="profile-search-results" hidden></div>
                 </div>
-
-                <!-- Populates using JavaScript that will be tied to what Shows 
-                    the User already has attached to their account -->
-                <div id="shows" class="scroll-list"></div>
+                <p id="watchlistStatus" class="form-status" aria-live="polite"></p>
+                <div class="results-head">
+                    <label>
+                        Sort by
+                        <select id="watchlistSort">
+                            <option value="recent">Recently added</option>
+                            <option value="services">On my services first</option>
+                            <option value="az">A to Z</option>
+                        </select>
+                    </label>
+                </div>
+                <div id="watchlistGrid" class="results-grid"></div>
             </section>
 
-            <!-- List for the Subscriptions -->
-            <section class="list-panel">
-                <h2>Subscriptions</h2>
-
-                <!-- Search Bar to search for any subscriptions to add to the list. Currently does nothing -->
-                <div class="add-to-profile">
-                    <input
-                        type="text"
-                        id="subscriptionSearch"
-                        placeholder="Search for a subscription service..."
-                    >
-
-                    
-                    <button type="button" disabled>
-                        Add
-                    </button>
-                </div>
-                
-                <!-- Populates using JavaScript that will be tied to what Subscriptions 
-                    the User already has attached to their account. -->
-                
-                <div id="subscriptions" class="scroll-list"></div>
+            <section id="watched" class="tab-panel" hidden>
+                <div id="watchedGrid" class="results-grid"></div>
             </section>
 
+            <section id="ratings" class="tab-panel" hidden>
+                <div id="ratingList" class="rating-list"></div>
+            </section>
+
+            <section id="services" class="tab-panel" hidden>
+                <input id="serviceSearch" class="field service-search" type="search" placeholder="Find a service..." aria-label="Find a service">
+                <div id="serviceTiles" class="service-tiles"></div>
+            </section>
+
+            <section id="account" class="tab-panel" hidden>
+                <div class="account-grid">
+                    <form id="detailsForm" class="panel form-grid">
+                        <h2>Account details</h2>
+                        <label>
+                            Username
+                            <input name="username" type="text" autocomplete="username" required>
+                        </label>
+                        <label>
+                            Email
+                            <input name="email" type="email" autocomplete="email" required>
+                        </label>
+                        <button class="btn btn-primary" type="submit">Save changes</button>
+                        <p class="form-status" aria-live="polite"></p>
+                    </form>
+
+                    <form id="passwordForm" class="panel form-grid">
+                        <h2>Change password</h2>
+                        <label>
+                            Current password
+                            <input name="current" type="password" autocomplete="current-password" required>
+                        </label>
+                        <label>
+                            New password
+                            <input name="next" type="password" autocomplete="new-password" minlength="8" maxlength="72" required>
+                        </label>
+                        <label>
+                            Confirm new password
+                            <input name="confirm" type="password" autocomplete="new-password" required>
+                        </label>
+                        <button class="btn" type="submit">Update password</button>
+                        <p class="form-status" aria-live="polite"></p>
+                    </form>
+
+                    <form id="deleteForm" class="panel form-grid danger-zone">
+                        <h2>Delete account</h2>
+                        <p>This deletes all your data.</p>
+                        <label>
+                            Password
+                            <input name="password" type="password" autocomplete="current-password" required>
+                        </label>
+                        <button class="btn btn-danger" type="submit">Delete my account</button>
+                        <p class="form-status" aria-live="polite"></p>
+                    </form>
+                </div>
+            </section>
         </div>
-
     </main>
 
-    <!-- The JavaScript that sets up the profile page by looking for the container section -->
-    <script src="proof-of-concept.js"></script>
-    <script type="module" src="auth.js"></script>
+    <script src="app.js"></script>
+    <script src="profile.js"></script>
 </body>
 </html>

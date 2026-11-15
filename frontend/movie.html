@@ -3,76 +3,79 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>7Movies Movie/Show</title>
+    <title>7Movies</title>
     <link rel="stylesheet" href="styles.css">
 </head>
-
-<!-- Main body of the Movie/Show page, called movie for simplicity -->
 <body>
-
-    <!-- This is the bar that runs across the top part of the site, houses the Site Name, 
-        the Search Bar, Sign out and Profile Buttons on this page -->
     <header class="topbar">
         <a class="brand" href="index.html">7Movies</a>
-        <div class="space-bar"></div>
-        
-            <!-- This is the search bar -->
-            <form id="searchForm" class="search">
-                <input
-                    id="searchInput"
-                    type="search"
-                    placeholder="Search movies/shows"
-                    aria-label="Search movies/shows"
-                >
-                <button type="submit" aria-label="Search">⌕</button>
-            </form>
-
-            <!-- The session script changes this to Sign Out after login. -->
-            <a class="nav-button" href="signin.html" data-session-link>Sign In</a>
-            
-            <!-- Profile Button: Hopefully we could eventually add a profile picture system and replace the "P" with the user's PFP -->
-            <a class="avatar" href="profile.html" aria-label="Your profile">P</a>
-       
+        <nav class="site-nav">
+            <a href="index.html">Home</a>
+            <a href="browse.html">Browse</a>
+            <a href="profile.html#watchlist">Watchlist</a>
+        </nav>
+        <form class="search" action="browse.html">
+            <input name="q" type="search" placeholder="Search movies and shows" aria-label="Search movies and shows">
+            <button type="submit" aria-label="Search">⌕</button>
+        </form>
+        <div class="header-account" data-account></div>
     </header>
 
-    <!-- Main section where all the movie information will be kept -->
     <main class="container">
-        <p id="sessionMessage" class="form-message" aria-live="polite"></p>
-        
-        <!-- This is the area where the Movie/Show's Poster, Name, Release Year, Genres and Synopsis will be populated by our JavaScript -->
-        <!-- See SetUpMoviePage in proof-of-concept.js for how it works -->
-        <section id="movieHero" class="movie-hero"></section>
+        <p id="pageMessage" class="no-results">Loading title...</p>
 
-        <!-- The lower section where the Subscriptions and the trailer are held -->
-        <div class="movie-content">
-            
-            <!-- Where the JavaScript sends the list of subscriptions the movie has -->
-            <section class="list-panel subscriptions">
-                <h2>Subscriptions</h2>
-                <ul id="subscriptionList" class="subscription-list"></ul>
-            </section>
+        <div id="titlePage" hidden>
+            <section id="titleHero" class="title-hero"></section>
 
-            <!-- Where the JavaScript sends the trailer's embed url to -->
-            <section class="trailer-panel">
-                <h2>Trailer</h2>
-                <div class="video-wrap">
-                    <iframe
-                        id="trailer"
-                        title="Movie trailer"
-                        src=""
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                        referrerpolicy="strict-origin-when-cross-origin"
-                        allowfullscreen
-                    ></iframe>
+            <div id="titleGrid" class="title-grid">
+                <section class="panel">
+                    <h2>Where to watch</h2>
+                    <ul id="whereToWatch" class="where-list"></ul>
+                </section>
+
+                <section id="trailer" class="panel">
+                    <h2>Trailer</h2>
+                    <div class="video-wrap">
+                        <iframe
+                            id="trailerFrame"
+                            title="Trailer"
+                            allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                            referrerpolicy="strict-origin-when-cross-origin"
+                            allowfullscreen
+                        ></iframe>
+                    </div>
+                </section>
+            </div>
+
+            <section id="similarSection" hidden>
+                <div class="row-head">
+                    <h2>More like this</h2>
                 </div>
+                <div id="similar" class="scroller"></div>
             </section>
 
-        </div>
+            <section id="reviews" class="panel">
+                <div class="row-head">
+                    <h2>Reviews</h2>
+                </div>
 
+                <form id="reviewForm" class="review-form" hidden>
+                    <div id="reviewStars" class="stars"></div>
+                    <textarea name="review" maxlength="2000" placeholder="Your review..."></textarea>
+                    <div class="rating-actions">
+                        <button class="btn btn-primary" type="submit">Post review</button>
+                        <button id="deleteRating" class="btn btn-ghost" type="button" hidden>Delete my rating</button>
+                    </div>
+                    <p id="reviewStatus" class="form-status" aria-live="polite"></p>
+                </form>
+
+                <p id="reviewSignIn" class="extraText" hidden><a href="signin.html">Sign in</a> to rate and review this title.</p>
+                <div id="reviewList"></div>
+            </section>
+        </div>
     </main>
 
-    <!-- The js script that will look for the movieHero section and populate information -->
-    <script src="proof-of-concept.js"></script>
-    <script type="module" src="auth.js"></script>
+    <script src="app.js"></script>
+    <script src="movie.js"></script>
 </body>
 </html>
