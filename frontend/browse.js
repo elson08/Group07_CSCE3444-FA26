@@ -111,73 +111,77 @@ function fillForm(form, params) {
 async function setupBrowse() {
     const params = new URLSearchParams(window.location.search);
     const form = document.querySelector("#filters");
+    const genreOptions = document.querySelector("#genreOptions");
+    const serviceOptions = document.querySelector("#serviceOptions");
+
+    // The backend enriches titles with streaming-provider data on first read.
+    // Load a small catalog page before requesting services so the filter list
+    // is not empty on a user's first visit.
+    try {
+        await api("/titles?limit=20");
+    } catch (error) {
+        console.warn("Could not initialize the title catalog:", error);
+    }
 
     const [genres, services] = await Promise.all([
-        api("/genres").catch(() => []),
-        api("/services").catch(() => []),
+        api("/genres").catch((error) => {
+            console.error("Could not load genres:", error);
+            return [];
+        }),
+        api("/services").catch((error) => {
+            console.error("Could not load subscriptions:", error);
+            return [];
+        }),
         sessionReady
     ]);
 
     const chosenGenres = params.getAll("genre");
-    document.querySelector("#genreOptions").innerHTML = genres
-        .map((genre) => `<label class="chip-check"><input type="checkbox" name="genre" value="${escapeHTML(genre.name)}" ${chosenGenres.includes(genre.name) ? "checked" : ""}><span>${escapeHTML(genre.name)}</span></label>`)
-        .join("");
+    genreOptions.innerHTML = genres.length
+        ? genres.map((genre) => `
+            <label class="chip-check">
+                <input type="checkbox" name="genre" value="${escapeHTML(genre.name)}"
+                    ${chosenGenres.includes(genre.name) ? "checked" : ""}>
+                <span>${escapeHTML(genre.name)}</span>
+            </label>`).join("")
+        : `<p class="extraText">Genres are not available yet. Start the backend and make sure the catalog has loaded.</p>`;
 
     const chosenServices = params.getAll("service");
-    const mine = new Set(session.services.map((service) => service.id));
-    document.querySelector("#serviceOptions").innerHTML = [...services]
-        .sort((a, b) => (mine.has(b.id) - mine.has(a.id)) || a.name.localeCompare(b.name))
-        .map((service) => `<label class="check"><input type="checkbox" name="service" value="${service.id}" ${chosenServices.includes(String(service.id)) ? "checked" : ""}> ${escapeHTML(service.name)}</label>`)
-        .join("");
+    const myServiceIDs = new Set((session.services || []).map((service) => Number(service.id)));
+    serviceOptions.innerHTML = services.length
+        ? [...services]
+            .sort((a, b) =>
+                (Number(myServiceIDs.has(Number(b.id))) - Number(myServiceIDs.has(Number(a.id))))
+                || a.name.localeCompare(b.name))
+            .map((service) => `
+                <label class="check">
+                    <input type="checkbox" name="service" value="${Number(service.id)}"
+                        ${chosenServices.includes(String(service.id)) ? "checked" : ""}>
+                    ${escapeHTML(service.name)}
+                </label>`).join("")
+        : `<p class="extraText">Subscription options appear after streaming availability has been loaded for titles.</p>`;
 
     document.querySelector("#mineOption").hidden = !session.user;
     fillForm(form, params);
 
-    const collapsibleFilters = [
-        "Streaming",
-        "Genres",
-        "Release year",
-        "Minimum 7Movies rating"
-    ];
-
-    form.querySelectorAll(".filter-group").forEach((group) => {
-        const heading = group.querySelector("h3");
-
-        if (!heading || !collapsibleFilters.includes(heading.textContent.trim())) {
-            return;
-            }
-
-        heading.classList.add("filter-toggle");
-        heading.setAttribute("role", "button");
-        heading.setAttribute("tabindex", "0");
-        heading.setAttribute("aria-expanded", "false");
-
-        group.classList.add("is-collapsed");
-
-        function toggleFilter() {
-            const collapsed = group.classList.toggle("is-collapsed");
-            heading.setAttribute("aria-expanded", String(!collapsed));
-            }
-
-        heading.addEventListener("click", toggleFilter);
-
-        heading.addEventListener("keydown", (event) => {
-            if (event.key === "Enter" || event.key === " ") {
-                event.preventDefault();
-                toggleFilter();
-                }
-            });
-        });
-
     form.elements.min_rating.addEventListener("input", () => {
-        document.querySelector("#minRatingLabel").textContent = minRatingText(form.elements.min_rating.value);
+        document.querySelector("#minRatingLabel").textContent =
+            minRatingText(form.elements.min_rating.value);
     });
 
+    // Keep the selected filters when the sort order changes.
     form.elements.sort.addEventListener("change", () => form.requestSubmit());
+
+    // Genre and subscription selections apply immediately. The selected
+    // values are serialized into the URL, so refresh/back/forward still work.
+    form.querySelectorAll('input[name="genre"], input[name="service"], input[name="kind"], input[name="mine"]')
+        .forEach((control) => {
+            control.addEventListener("change", () => form.requestSubmit());
+        });
 
     form.addEventListener("submit", (event) => {
         event.preventDefault();
         const next = new URLSearchParams();
+
         for (const [key, value] of new FormData(form)) {
             const skip = value === ""
                 || (key === "min_rating" && Number(value) === 0)
@@ -186,14 +190,21 @@ async function setupBrowse() {
                 next.append(key, value);
             }
         }
+
+        // A new filter combination always starts on the first results page.
+        next.delete("page");
         window.location.search = next.toString();
     });
 
     request("/titles?limit=1")
         .then(({ total }) => {
-            document.querySelector("#catalogSize").textContent = `${total.toLocaleString()} movies and shows`;
+            document.querySelector("#catalogSize").textContent =
+                `${total.toLocaleString()} movies and shows`;
         })
-        .catch(() => {});
+        .catch(() => {
+            document.querySelector("#catalogSize").textContent =
+                "The catalog could not be loaded.";
+        });
 
     await loadResults(params, services);
 }
