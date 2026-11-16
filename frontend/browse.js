@@ -133,6 +133,42 @@ async function setupBrowse() {
     document.querySelector("#mineOption").hidden = !session.user;
     fillForm(form, params);
 
+    const collapsibleFilters = [
+        "Streaming",
+        "Genres",
+        "Release year",
+        "Minimum 7Movies rating"
+    ];
+
+    form.querySelectorAll(".filter-group").forEach((group) => {
+        const heading = group.querySelector("h3");
+
+        if (!heading || !collapsibleFilters.includes(heading.textContent.trim())) {
+            return;
+            }
+
+        heading.classList.add("filter-toggle");
+        heading.setAttribute("role", "button");
+        heading.setAttribute("tabindex", "0");
+        heading.setAttribute("aria-expanded", "false");
+
+        group.classList.add("is-collapsed");
+
+        function toggleFilter() {
+            const collapsed = group.classList.toggle("is-collapsed");
+            heading.setAttribute("aria-expanded", String(!collapsed));
+            }
+
+        heading.addEventListener("click", toggleFilter);
+
+        heading.addEventListener("keydown", (event) => {
+            if (event.key === "Enter" || event.key === " ") {
+                event.preventDefault();
+                toggleFilter();
+                }
+            });
+        });
+
     form.elements.min_rating.addEventListener("input", () => {
         document.querySelector("#minRatingLabel").textContent = minRatingText(form.elements.min_rating.value);
     });

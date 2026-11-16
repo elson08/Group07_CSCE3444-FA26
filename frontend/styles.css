@@ -574,12 +574,16 @@ section {
     color: var(--extraTextColor);
     font-weight: 600;
     text-decoration: none;
+    border: 1px solid var(--border);
+    border-radius: 18px;
 }
 
 .site-nav a:hover,
 .site-nav a.active {
     background: var(--dividerColor);
     color: var(--textColor);
+    border: 1px solid #0b0f18;
+    border-radius: 18px;
 }
 
 .avatar.small {
@@ -1317,6 +1321,12 @@ textarea {
     cursor: pointer;
 }
 
+.tabs button:hover:not([aria-selected="true"]) {
+    color: var(--highlightColor);
+    background: rgba(21, 173, 233, 0.08);
+    border-bottom-color: var(--highlightColor);
+}
+
 .tabs button[aria-selected="true"] {
     border-bottom-color: var(--highlightColor);
     color: var(--textColor);
@@ -1566,6 +1576,7 @@ textarea {
 
 .search-add input {
     width: 100%;
+    background: var(--dividerColor);
 }
 
 .search-add .profile-search-results {
@@ -1610,4 +1621,210 @@ textarea {
 
 .profile-head .actions {
     margin-top: 0;
+}
+
+main.container:has(#genreSection) {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 250px;
+    column-gap: 25px;
+}
+
+main.container:has(#genreSection) > #hero,
+main.container:has(#genreSection) > #serviceBar,
+main.container:has(#genreSection) > section[data-row],
+main.container:has(#genreSection) > #homeMessage {
+    grid-column: 1;
+}
+
+#genreSection {
+    grid-column: 2;
+    grid-row: 1 / span 10;
+
+    position: sticky;
+    top: 20px;
+    align-self: start;
+
+    max-height: 75vh;
+    display: flex;
+    flex-direction: column;
+
+    padding: 16px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+/* Keep heading above scrollbar */
+#genreSection h2 {
+    flex-shrink: 0;
+    margin-top: 0;
+}
+
+/* Only genre buttons scroll */
+#genreSection .genre-tiles {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+
+    overflow-y: auto;
+    min-height: 0;
+    padding-right: 5px;
+}
+
+/* Scrollbar styling */
+#genreSection .genre-tiles::-webkit-scrollbar {
+    width: 6px;
+}
+
+#genreSection .genre-tiles::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 10px;
+}
+
+#genreSection .genre-tiles::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+#genreSection .genre-tiles {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+}
+
+#genreSection::-webkit-scrollbar {
+    width: 6px;
+}
+
+#genreSection::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 10px;
+}
+
+#genreSection::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+@media (max-width: 850px) {
+    #genreSection {
+        position: static;
+        max-height: 300px;
+        margin-top: 25px;
+    }
+
+    #genreSection .genre-tiles {
+        grid-template-columns: repeat(
+            auto-fill,
+            minmax(150px, 1fr)
+        );
+    }
+}
+
+.filter-group:not(.is-collapsed) .filter-toggle::after {
+    transform: rotate(180deg);
+}
+
+.filter-group.is-collapsed > :not(h3) {
+    display: none;
+}
+
+.filter-toggle:focus-visible {
+    outline: 2px solid var(--highlightColor);
+    outline-offset: 4px;
+    border-radius: 3px;
+}
+
+.filter-group h3.filter-toggle {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    width: 100%;
+}
+
+.filter-group h3.filter-toggle::after {
+    content: "▼";
+    display: inline-block;
+    font-size: 10px;
+    color: var(--highlightColor);
+    margin-left: 12px;
+    transition: transform 0.2s ease;
+    transform: rotate(90deg);
+}
+
+.filter-group:not(.is-collapsed) h3.filter-toggle::after {
+    transform: rotate(0deg);
+}
+
+.results {
+    min-width: 0;
+    padding: 20px;
+
+    background: var(--mainColor);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+}
+
+.results-head {
+    margin-bottom: 16px;
+}
+
+#activeFilters {
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 18px;
+}
+
+#results {
+    padding-top: 4px;
+}
+
+#pagination {
+    padding-top: 18px;
+    border-top: 1px solid var(--border);
+    margin-top: 24px;
+}
+
+@media (max-width: 600px) {
+    .results {
+        padding: 14px;
+    }
+}
+
+main.container:has(#genreSection) > section[data-row],
+main.container:has(#genreSection) > #genreSection {
+    padding: 20px;
+    margin-bottom: 24px;
+
+    background: var(--mainColor);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+
+    transition: border-color 0.2s ease;
+}
+
+main.container:has(#genreSection) .row-head {
+    margin-bottom: 18px;
+}
+
+main.container:has(#genreSection) section[data-row] .scroller {
+    padding-bottom: 12px;
+}
+
+@media (max-width: 600px) {
+    main.container:has(#genreSection) > section[data-row],
+    main.container:has(#genreSection) > #genreSection {
+        padding: 14px;
+        margin-bottom: 18px;
+    }
+}
+
+.results-grid {
+    padding: 20px;
+
+    background: var(--mainColor);
+    
+
+    min-height: 100px;
+
+    gap: 16px;
 }
