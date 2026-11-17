@@ -42,18 +42,18 @@
                 </div>
 
                 <div class="filter-group">
-                    <h3>Subscriptions</h3>
+                    <h3 class="filter-toggle" role="button" tabindex="0" aria-expanded="false">Subscriptions</h3>
                     <label id="mineOption" class="check" hidden><input type="checkbox" name="mine" value="1"> Only my services</label>
                     <div id="serviceOptions" class="check-list"></div>
                 </div>
 
                 <div class="filter-group">
-                    <h3>Genres</h3>
+                    <h3 class="filter-toggle" role="button" tabindex="0" aria-expanded="false">Genres</h3>
                     <div id="genreOptions" class="chip-row"></div>
                 </div>
 
                 <div class="filter-group">
-                    <h3>Release year</h3>
+                    <h3 class="filter-toggle" role="button" tabindex="0" aria-expanded="false">Release year</h3>
                     <div class="range-row">
                         <input type="number" name="year_from" min="1800" max="2100" placeholder="From" aria-label="From year">
                         <span>to</span>
@@ -62,7 +62,7 @@
                 </div>
 
                 <div class="filter-group">
-                    <h3>Minimum 7Movies rating</h3>
+                    <h3 class="filter-toggle" role="button" tabindex="0" aria-expanded="false">Minimum 7Movies rating</h3>
                     <input type="range" name="min_rating" min="0" max="5" step="0.5" value="0" aria-label="Minimum rating">
                     <span id="minRatingLabel" class="rating">Any rating</span>
                 </div>

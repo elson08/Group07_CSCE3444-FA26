@@ -1,5 +1,51 @@
 const pageSize = 24;
 
+function setupFilterDropdowns() {
+    const groups = [...document.querySelectorAll("#filters .filter-group")];
+
+    const savedOpenGroups = JSON.parse(
+        sessionStorage.getItem("browseOpenFilters") || "[]"
+    );
+
+    groups.forEach((group, index) => {
+        const heading = group.querySelector(".filter-toggle");
+
+        if (!heading) return;
+
+        const isOpen = savedOpenGroups.includes(index);
+
+        group.classList.toggle("is-collapsed", !isOpen);
+        heading.setAttribute("aria-expanded", String(isOpen));
+
+        const toggleDropdown = () => {
+            group.classList.toggle("is-collapsed");
+
+            const expanded = !group.classList.contains("is-collapsed");
+            heading.setAttribute("aria-expanded", String(expanded));
+
+            const openGroups = groups
+                .map((item, i) =>
+                    item.classList.contains("is-collapsed") ? null : i
+                )
+                .filter(i => i !== null);
+
+            sessionStorage.setItem(
+                "browseOpenFilters",
+                JSON.stringify(openGroups)
+            );
+        };
+
+        heading.addEventListener("click", toggleDropdown);
+
+        heading.addEventListener("keydown", (event) => {
+            if (event.key === "Enter" || event.key === " ") {
+                event.preventDefault();
+                toggleDropdown();
+            }
+        });
+    });
+}
+
 function minRatingText(value) {
     return Number(value) > 0 ? `★ ${value} and up` : "Any rating";
 }
@@ -161,6 +207,7 @@ async function setupBrowse() {
         : `<p class="extraText">Subscription options appear after streaming availability has been loaded for titles.</p>`;
 
     document.querySelector("#mineOption").hidden = !session.user;
+    setupFilterDropdowns();
     fillForm(form, params);
 
     form.elements.min_rating.addEventListener("input", () => {

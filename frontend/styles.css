@@ -1755,6 +1755,15 @@ main.container:has(#genreSection) > #homeMessage {
     transform: rotate(0deg);
 }
 
+.filter-group h3.filter-toggle {
+    cursor: pointer;
+    user-select: none;
+}
+
+.filter-group h3.filter-toggle:hover {
+    color: var(--highlightColor);
+}
+
 .results {
     min-width: 0;
     padding: 20px;
@@ -1818,13 +1827,10 @@ main.container:has(#genreSection) section[data-row] .scroller {
     }
 }
 
-.results-grid {
+.results-grid, .rating-list {
     padding: 20px;
-
     background: var(--mainColor);
-    
-
+    border-radius: 14px;
     min-height: 100px;
-
     gap: 16px;
 }
